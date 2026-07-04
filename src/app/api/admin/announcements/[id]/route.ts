@@ -1,0 +1,25 @@
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/utils/require-admin";
+import { announcementsService } from "@/modules/announcements/announcements.service";
+import { ok, fail } from "@/utils/api-response";
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await requireAdmin();
+    const { status } = await req.json();
+    await announcementsService.setStatus(params.id, status);
+    return ok(null, "Status yeniləndi");
+  } catch (err: any) {
+    return fail(err.message ?? "Xəta", err.status ?? 500);
+  }
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  try {
+    await requireAdmin();
+    await announcementsService.softDelete(params.id);
+    return ok(null, "Elan silindi");
+  } catch (err: any) {
+    return fail(err.message ?? "Xəta", err.status ?? 500);
+  }
+}
