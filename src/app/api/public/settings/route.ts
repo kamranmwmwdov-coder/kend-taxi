@@ -1,6 +1,14 @@
 import { getSupabaseAdmin } from "@/utils/supabase-admin";
 import { ok, fail } from "@/utils/api-response";
 
+// Bu route DB-dən oxuyur (admin panelindən dəyişən parametrlər).
+// Dinamik funksiya çağırışı olmadığı üçün Next.js bunu build vaxtı
+// statik cache-ləyib nəticəni "dondururdu" — admin dəyəri dəyişsə belə
+// bu endpoint həmişə köhnə (build vaxtı) qiyməti qaytarırdı.
+// force-dynamic hər sorğuda DB-dən təzə oxunmasını təmin edir.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const PUBLIC_KEYS = ["app_name", "whatsapp_admin_number"];
 
 export async function GET() {
