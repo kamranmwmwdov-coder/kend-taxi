@@ -29,18 +29,26 @@ export default async function CustomerHomePage() {
       <AnnouncementBanner />
 
       <div className="grid grid-cols-1 gap-3 mb-6">
-        {CARDS.map(({ href, icon: Icon, label, color }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-4 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform"
-          >
-            <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white`}>
-              <Icon size={22} />
-            </div>
-            <span className="font-semibold text-ink">{label}</span>
-          </Link>
-        ))}
+        {CARDS.map(({ href, icon: Icon, label, color }) => {
+          const image = href === "/customer/baku-trip" ? "/images/baku-flame-towers.jpg" : undefined;
+
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`relative flex items-center gap-4 overflow-hidden rounded-2xl p-5 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform ${
+                image ? "bg-cover bg-center text-white" : "bg-white"
+              }`}
+              style={image ? { backgroundImage: `url(${image})` } : undefined}
+            >
+              {image ? <span className="absolute inset-0 bg-black/50" aria-hidden="true" /> : null}
+              <div className={`relative z-10 w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white`}>
+                <Icon size={22} />
+              </div>
+              <span className={`relative z-10 font-semibold ${image ? "text-white" : "text-ink"}`}>{label}</span>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-8">
