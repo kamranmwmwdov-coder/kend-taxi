@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Input } from "@/components/Input";
 import { PhoneInput } from "@/components/PhoneInput";
 import { Button } from "@/components/Button";
+import { notificationSound } from "@/utils/notification-sound";
 
 const TIME_OPTIONS = [
   { value: "MORNING", label: "Səhər", image: "/images/baku-morning.jpg" },
@@ -46,6 +47,7 @@ export default function BakuTripPage() {
         setError(json.message);
         return;
       }
+      void notificationSound.play("ORDER_CREATED", `customer-order-created:${json.data.id}`);
       router.push(`/customer/orders/baku/${json.data.id}`);
     } catch {
       setError("İnternet bağlantısı yoxdur.");

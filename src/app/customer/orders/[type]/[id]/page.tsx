@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Countdown } from "@/components/Countdown";
+import { notificationSound } from "@/utils/notification-sound";
 
 const STATUS_LABEL: Record<string, string> = {
   NEW: "Yeni",
@@ -52,6 +53,9 @@ export default function OrderStatusPage() {
     });
     const json = await res.json();
     if (!json.success) setError(json.message);
+    else {
+      void notificationSound.play("CUSTOMER_SELECTED", `customer-selected-driver:${params.type}:${params.id}:${driverId}`);
+    }
     setBusy(false);
     load();
   }

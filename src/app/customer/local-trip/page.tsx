@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Input } from "@/components/Input";
 import { PhoneInput } from "@/components/PhoneInput";
 import { Button } from "@/components/Button";
+import { notificationSound } from "@/utils/notification-sound";
 
 export default function LocalTripPage() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export default function LocalTripPage() {
         setError(json.message);
         return;
       }
+      void notificationSound.play("ORDER_CREATED", `customer-order-created:${json.data.id}`);
       router.push(`/customer/orders/local/${json.data.id}`);
     } catch {
       setError("İnternet bağlantısı yoxdur.");

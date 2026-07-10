@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
+import { notificationSound } from "@/utils/notification-sound";
 
 export default function CargoPage() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function CargoPage() {
         setError(json.message);
         return;
       }
+      void notificationSound.play("ORDER_CREATED", `customer-order-created:${json.data.id}`);
       router.push(`/customer/orders/cargo/${json.data.id}`);
     } catch {
       setError("İnternet bağlantısı yoxdur.");

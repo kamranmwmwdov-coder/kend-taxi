@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { SoundNotificationProvider } from "@/components/SoundNotificationProvider";
 
 export const metadata: Metadata = {
   title: "Kənd Taxi",
@@ -12,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="az">
       <body className="min-h-screen">
         <OfflineBanner />
+        <SoundNotificationProvider />
         {children}
       </body>
     </html>

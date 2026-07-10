@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSession } from "@/utils/session";
 import { LogoutButton } from "@/components/LogoutButton";
 import { NotificationBell } from "@/components/NotificationBell";
+import { SoundToggle } from "@/components/SoundToggle";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { AdBanner } from "@/components/AdBanner";
 import { Bus, Package, Car, History, User } from "lucide-react";
@@ -24,7 +25,10 @@ export default async function CustomerHomePage() {
           <p className="text-ink-muted text-sm">Xoş gəldiniz,</p>
           <h1 className="text-xl font-bold">{session.firstName}</h1>
         </div>
-        <NotificationBell href="/customer/notifications" />
+        <div className="flex items-center gap-1">
+          <SoundToggle />
+          <NotificationBell href="/customer/notifications" />
+        </div>
       </div>
 
       <AnnouncementBanner />
