@@ -8,9 +8,9 @@ import { AdBanner } from "@/components/AdBanner";
 import { Bus, Package, Car, History, User } from "lucide-react";
 
 const CARDS = [
-  { href: "/customer/baku-trip", icon: Bus, label: "Bakı Reysi", color: "bg-primary" },
-  { href: "/customer/cargo", icon: Package, label: "El Yükü", color: "bg-warning" },
-  { href: "/customer/local-trip", icon: Car, label: "Rayon Daxili", color: "bg-success" },
+  { href: "/customer/baku-trip", icon: Bus, label: "Bakı Reysi", color: "bg-primary", image: "/images/baku-flame-towers.jpg" },
+  { href: "/customer/cargo", icon: Package, label: "El Yükü", color: "bg-warning", image: "/images/cargo.jpg" },
+  { href: "/customer/local-trip", icon: Car, label: "Rayon Daxili", color: "bg-success", image: "/images/local-trip.jpg" },
 ];
 
 export default async function CustomerHomePage() {
@@ -33,36 +33,32 @@ export default async function CustomerHomePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-6">
-        {CARDS.map(({ href, icon: Icon, label, color }) => {
-          const image = href === "/customer/baku-trip" ? "/images/baku-flame-towers.jpg" : undefined;
-
-          return (
+        {CARDS.map(({ href, icon: Icon, label, color, image }) => (
             <Link
               key={href}
               href={href}
-              className={`relative flex items-center gap-4 overflow-hidden rounded-2xl p-5 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform ${
-                image ? "bg-cover bg-center text-white" : "bg-white"
-              }`}
-              style={image ? { backgroundImage: `url(${image})` } : undefined}
+              className="relative flex items-center gap-4 overflow-hidden rounded-2xl p-5 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform bg-cover bg-center text-white"
+              style={{ backgroundImage: `url(${image})` }}
             >
-              {image ? <span className="absolute inset-0 bg-black/50" aria-hidden="true" /> : null}
+              <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
               <div className={`relative z-10 w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white`}>
                 <Icon size={22} />
               </div>
-              <span className={`relative z-10 font-semibold ${image ? "text-white" : "text-ink"}`}>{label}</span>
+              <span className="relative z-10 font-semibold text-white">{label}</span>
             </Link>
-          );
-        })}
+          ))}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-8">
-        <Link href="/customer/orders" className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 border border-gray-100">
-          <History size={20} className="text-ink-muted" />
-          <span className="text-sm font-medium">Sifariş Tarixçəm</span>
+        <Link href="/customer/orders" className="relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl p-4 border border-gray-100 bg-cover bg-center text-white" style={{ backgroundImage: "url(/images/orders.jpg)" }}>
+          <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
+          <History size={20} className="relative z-10" />
+          <span className="relative z-10 text-sm font-medium">Sifariş Tarixçəm</span>
         </Link>
-        <Link href="/customer/profile" className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 border border-gray-100">
-          <User size={20} className="text-ink-muted" />
-          <span className="text-sm font-medium">Profilim</span>
+        <Link href="/customer/profile" className="relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl p-4 border border-gray-100 bg-cover bg-center text-white" style={{ backgroundImage: "url(/images/profile.jpg)" }}>
+          <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
+          <User size={20} className="relative z-10" />
+          <span className="relative z-10 text-sm font-medium">Profilim</span>
         </Link>
       </div>
 

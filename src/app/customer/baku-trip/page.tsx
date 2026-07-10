@@ -8,9 +8,9 @@ import { PhoneInput } from "@/components/PhoneInput";
 import { Button } from "@/components/Button";
 
 const TIME_OPTIONS = [
-  { value: "MORNING", label: "Səhər" },
-  { value: "NOON", label: "Günorta" },
-  { value: "EVENING", label: "Axşam" },
+  { value: "MORNING", label: "Səhər", image: "/images/baku-morning.jpg" },
+  { value: "NOON", label: "Günorta", image: "/images/baku-noon.jpg" },
+  { value: "EVENING", label: "Axşam", image: "/images/baku-evening.jpg" },
 ];
 
 export default function BakuTripPage() {
@@ -70,11 +70,13 @@ export default function BakuTripPage() {
                 key={t.value}
                 type="button"
                 onClick={() => setForm({ ...form, tripTime: t.value })}
-                className={`min-h-[48px] rounded-xl border font-medium text-sm ${
-                  form.tripTime === t.value ? "bg-primary text-white border-primary" : "bg-white border-gray-200 text-ink"
+                className={`relative min-h-[48px] overflow-hidden rounded-xl border bg-cover bg-center font-medium text-sm text-white ${
+                  form.tripTime === t.value ? "border-primary" : "border-gray-200"
                 }`}
+                style={{ backgroundImage: `url(${t.image})` }}
               >
-                {t.label}
+                <span className={`absolute inset-0 ${form.tripTime === t.value ? "bg-primary/70" : "bg-black/50"}`} aria-hidden="true" />
+                <span className="relative z-10">{t.label}</span>
               </button>
             ))}
           </div>
