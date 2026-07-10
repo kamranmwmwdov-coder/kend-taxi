@@ -16,6 +16,7 @@ export const adsService = {
   async create(input: {
     title: string; description?: string; imageUrl?: string; linkUrl?: string;
     backgroundColor?: string; textColor?: string; textStyle?: string; lentColor?: string;
+    displayDurationSeconds?: number;
     priority: number; targetRole: "ALL" | "CUSTOMER" | "DRIVER";
     startsAt: string; endsAt: string;
   }) {
@@ -26,6 +27,9 @@ export const adsService = {
     if (new Date(startsAt).getTime() >= new Date(endsAt).getTime()) {
       throw new Error("Advertisement end date must be after start date");
     }
+    const displayDurationSeconds = typeof input.displayDurationSeconds === "number" && Number.isFinite(input.displayDurationSeconds)
+      ? Math.max(1, Math.min(3600, Math.round(input.displayDurationSeconds!)))
+      : 5;
 
     const { data, error } = await supabase
       .from("advertisements")
@@ -38,6 +42,7 @@ export const adsService = {
         text_color: input.textColor ?? "#1F2430",
         text_style: input.textStyle ?? "font-semibold",
         lent_color: input.lentColor ?? "#1D6FE0",
+        display_duration_seconds: displayDurationSeconds,
         priority: input.priority,
         target_role: input.targetRole,
         starts_at: startsAt,
@@ -66,7 +71,7 @@ export const adsService = {
   },
 
   // Giriş səhifəsində göstəriləcək aktiv reklamı tapır (prioritet + tarix aralığı)
-  async getActiveAd(targetRole: "ALL" | "CUSTOMER" | "DRIVER" = "ALL") {
+  async getActiveAds(targetRole: "ALL" | "CUSTOMER" | "DRIVER" = "ALL") {
     const supabase = getSupabaseAdmin();
     const now = nowUtcIso();
     const { data, error } = await supabase
@@ -78,13 +83,9 @@ export const adsService = {
       .gte("ends_at", now)
       .is("deleted_at", null)
       .order("priority", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("created_at", { ascending: true });
     if (error) throw error;
-    if (data) {
-      await supabase.from("advertisements").update({ impressions: (data.impressions ?? 0) + 1 }).eq("id", data.id);
-    }
-    return data;
+    return data ?? [];
   },
 
   async registerClick(id: string) {

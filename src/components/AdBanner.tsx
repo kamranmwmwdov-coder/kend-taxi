@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from "react";
 
 interface Ad {
   id: string;
@@ -11,20 +11,65 @@ interface Ad {
   text_color: string | null;
   text_style: string | null;
   lent_color: string | null;
+  display_duration_seconds: number | null;
 }
 
 export function AdBanner({ targetRole = "ALL" }: { targetRole?: "ALL" | "CUSTOMER" | "DRIVER" }) {
-  const [ad, setAd] = useState<Ad | null>(null);
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const pointerStartX = useRef<number | null>(null);
+  const didDrag = useRef(false);
 
   useEffect(() => {
     fetch(`/api/ads/active?targetRole=${targetRole}`)
       .then((r) => r.json())
       .then((json) => {
-        if (json.success && json.data) setAd(json.data);
+        if (json.success && Array.isArray(json.data)) {
+          setAds(json.data);
+          setActiveIndex(0);
+        }
       });
   }, [targetRole]);
 
-  async function handleClick() {
+  const ad = ads[activeIndex];
+  const activeDuration = Math.max(1, ad?.display_duration_seconds ?? 5) * 1000;
+
+  useEffect(() => {
+    if (ads.length < 2) return;
+    const timer = window.setTimeout(() => {
+      setActiveIndex((index) => (index + 1) % ads.length);
+    }, activeDuration);
+    return () => window.clearTimeout(timer);
+  }, [activeDuration, activeIndex, ads.length]);
+
+  function moveSlide(direction: 1 | -1) {
+    if (ads.length < 2) return;
+    setActiveIndex((index) => (index + direction + ads.length) % ads.length);
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    pointerStartX.current = event.clientX;
+    didDrag.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (pointerStartX.current !== null && Math.abs(event.clientX - pointerStartX.current) > 8) didDrag.current = true;
+  }
+
+  function handlePointerEnd(event: PointerEvent<HTMLDivElement>) {
+    if (pointerStartX.current === null) return;
+    const distance = event.clientX - pointerStartX.current;
+    pointerStartX.current = null;
+    if (Math.abs(distance) >= 40) moveSlide(distance < 0 ? 1 : -1);
+  }
+
+  async function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (didDrag.current) {
+      event.preventDefault();
+      didDrag.current = false;
+      return;
+    }
     if (!ad?.link_url) return;
     fetch(`/api/ads/${ad.id}/click`, { method: "POST" }).catch(() => {});
   }
@@ -43,7 +88,13 @@ export function AdBanner({ targetRole = "ALL" }: { targetRole?: "ALL" | "CUSTOME
   const textStyle = ad.text_style || "font-semibold";
 
   const content = (
-    <div className="h-[20vh] min-h-[110px] border-b border-gray-200 overflow-hidden bg-white">
+    <div
+      className="h-[20vh] min-h-[110px] border-b border-gray-200 overflow-hidden bg-white select-none touch-pan-y cursor-grab active:cursor-grabbing"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+    >
       <div
         className="h-[65%] bg-cover bg-center"
         style={ad.image_url ? { backgroundImage: `url(${ad.image_url})`, backgroundColor } : { backgroundColor }}

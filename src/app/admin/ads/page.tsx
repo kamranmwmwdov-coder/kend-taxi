@@ -22,6 +22,7 @@ interface Ad {
   status: string;
   impressions: number;
   clicks: number;
+  display_duration_seconds: number;
 }
 
 interface PreviewProps {
@@ -99,6 +100,7 @@ export default function AdminAdsPage() {
               <p className="text-xs text-ink-muted mb-3">
                 Gosterilme: {ad.impressions} | Klik: {ad.clicks}
               </p>
+              <p className="text-xs text-ink-muted mb-3">Slayd muddeti: {ad.display_duration_seconds ?? 5} saniye</p>
               <AdPreview
                 title={ad.title}
                 description={ad.description}
@@ -137,6 +139,7 @@ function NewAdModal({ onClose, onCreated }: { onClose: () => void; onCreated: ()
     textStyle: "font-semibold",
     lentColor: "#1D6FE0",
     priority: 0,
+    displayDurationSeconds: 5,
     targetRole: "CUSTOMER",
     startsAt: "",
     endsAt: "",
@@ -261,6 +264,7 @@ function NewAdModal({ onClose, onCreated }: { onClose: () => void; onCreated: ()
           </div>
 
           <Input label="Prioritet" type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })} />
+          <Input label="Gosterilme muddeti (saniye)" type="number" min="1" value={form.displayDurationSeconds} onChange={(e) => setForm({ ...form, displayDurationSeconds: e.target.value === "" ? 5 : Number(e.target.value) })} />
           <Input label="Baslama tarixi" type="datetime-local" value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} />
           <Input label="Bitme tarixi" type="datetime-local" value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} />
 

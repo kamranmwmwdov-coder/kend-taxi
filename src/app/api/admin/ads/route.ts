@@ -18,6 +18,9 @@ export async function POST(req: NextRequest) {
   try {
     const admin = await requireAdmin();
     const body = await req.json();
+    if (body.displayDurationSeconds !== undefined && (!Number.isFinite(Number(body.displayDurationSeconds)) || Number(body.displayDurationSeconds) < 1)) {
+      return fail("Display duration must be at least 1 second.", 422);
+    }
     if (!body.title || !body.startsAt || !body.endsAt) {
       return fail("Başlıq, başlama və bitmə tarixi tələb olunur.", 422);
     }
