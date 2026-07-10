@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { formatAzerbaijanDateTime } from "@/utils/azerbaijan-time";
 
 interface Ad {
   id: string;
@@ -93,7 +94,7 @@ export default function AdminAdsPage() {
               </div>
               <p className="text-xs text-ink-muted mb-1">Hedef: {ad.target_role} | Prioritet: {ad.priority}</p>
               <p className="text-xs text-ink-muted mb-3">
-                {new Date(ad.starts_at).toLocaleDateString("az-AZ")} - {new Date(ad.ends_at).toLocaleDateString("az-AZ")}
+                {formatAzerbaijanDateTime(ad.starts_at)} - {formatAzerbaijanDateTime(ad.ends_at)}
               </p>
               <p className="text-xs text-ink-muted mb-3">
                 Gosterilme: {ad.impressions} | Klik: {ad.clicks}

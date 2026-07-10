@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/utils/supabase-admin";
+import { azerbaijanDateTimeLocalToUtcIso, nowUtcIso } from "@/utils/azerbaijan-time";
 
 export const adsService = {
   async listAll() {
@@ -19,6 +20,13 @@ export const adsService = {
     startsAt: string; endsAt: string;
   }) {
     const supabase = getSupabaseAdmin();
+    const startsAt = azerbaijanDateTimeLocalToUtcIso(input.startsAt);
+    const endsAt = azerbaijanDateTimeLocalToUtcIso(input.endsAt);
+
+    if (new Date(startsAt).getTime() >= new Date(endsAt).getTime()) {
+      throw new Error("Advertisement end date must be after start date");
+    }
+
     const { data, error } = await supabase
       .from("advertisements")
       .insert({
@@ -32,8 +40,8 @@ export const adsService = {
         lent_color: input.lentColor ?? "#1D6FE0",
         priority: input.priority,
         target_role: input.targetRole,
-        starts_at: input.startsAt,
-        ends_at: input.endsAt,
+        starts_at: startsAt,
+        ends_at: endsAt,
         status: "ACTIVE",
       })
       .select()
@@ -60,7 +68,7 @@ export const adsService = {
   // Giriş səhifəsində göstəriləcək aktiv reklamı tapır (prioritet + tarix aralığı)
   async getActiveAd(targetRole: "ALL" | "CUSTOMER" | "DRIVER" = "ALL") {
     const supabase = getSupabaseAdmin();
-    const now = new Date().toISOString();
+    const now = nowUtcIso();
     const { data, error } = await supabase
       .from("advertisements")
       .select("*")
