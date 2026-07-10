@@ -14,7 +14,6 @@ export const adsService = {
 
   async create(input: {
     title: string; description?: string; imageUrl?: string; linkUrl?: string;
-    backgroundColor?: string; textColor?: string; textStyle?: string; lentColor?: string;
     priority: number; targetRole: "ALL" | "CUSTOMER" | "DRIVER";
     startsAt: string; endsAt: string;
   }) {
@@ -26,10 +25,6 @@ export const adsService = {
         description: input.description ?? null,
         image_url: input.imageUrl ?? null,
         link_url: input.linkUrl ?? null,
-        background_color: input.backgroundColor ?? "#EEF2F7",
-        text_color: input.textColor ?? "#1F2430",
-        text_style: input.textStyle ?? "font-semibold",
-        lent_color: input.lentColor ?? "#1D6FE0",
         priority: input.priority,
         target_role: input.targetRole,
         starts_at: input.startsAt,

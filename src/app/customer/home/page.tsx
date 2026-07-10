@@ -4,7 +4,6 @@ import { getSession } from "@/utils/session";
 import { LogoutButton } from "@/components/LogoutButton";
 import { NotificationBell } from "@/components/NotificationBell";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
-import { AdBanner } from "@/components/AdBanner";
 import { Bus, Package, Car, History, User } from "lucide-react";
 
 const CARDS = [
@@ -28,9 +27,6 @@ export default async function CustomerHomePage() {
       </div>
 
       <AnnouncementBanner />
-      <div className="mb-6 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-        <AdBanner targetRole="CUSTOMER" />
-      </div>
 
       <div className="grid grid-cols-1 gap-3 mb-6">
         {CARDS.map(({ href, icon: Icon, label, color }) => {
