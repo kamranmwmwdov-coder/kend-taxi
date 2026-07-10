@@ -31,8 +31,16 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
   const knownOfferIds = useRef(new Set<string>());
   const knownActiveStates = useRef(new Map<string, string>());
   const hasLoadedSounds = useRef(false);
+  const refreshInFlight = useRef(false);
+  const refreshQueued = useRef(false);
 
   async function loadAll() {
+    if (refreshInFlight.current) {
+      refreshQueued.current = true;
+      return;
+    }
+    refreshInFlight.current = true;
+    try {
     const [servicesRes, ordersRes, activeRes] = await Promise.all([
       fetch("/api/driver/services").then((r) => r.json()),
       fetch("/api/driver/new-orders").then((r) => r.json()),
@@ -67,12 +75,30 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
     }
     hasLoadedSounds.current = true;
     setLoading(false);
+    } catch {
+      // Preserve the last successful dashboard state until the next refresh.
+    } finally {
+      refreshInFlight.current = false;
+      if (refreshQueued.current) {
+        refreshQueued.current = false;
+        void loadAll();
+      }
+    }
   }
 
   useEffect(() => {
     loadAll();
     const interval = setInterval(loadAll, 10000); // növbəti mərhələdə Realtime ilə əvəz olunacaq
-    return () => clearInterval(interval);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void loadAll();
+    };
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, []);
 
   async function toggleService(serviceType: string, enabled: boolean) {

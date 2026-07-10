@@ -28,13 +28,17 @@ export const ordersService = {
       throw new OrderError("Sizin artıq aktiv sifarişiniz var. Əvvəlcə onu tamamlayın və ya ləğv edin.", 409);
     }
 
-    const capacity = Number(await ordersRepository.getSetting("baku_trip_capacity"));
-    const used = await ordersRepository.getBakuTripSeatUsage(input.tripDate, input.tripTime);
+    const [capacitySetting, used, basePriceSetting] = await Promise.all([
+      ordersRepository.getSetting("baku_trip_capacity"),
+      ordersRepository.getBakuTripSeatUsage(input.tripDate, input.tripTime),
+      ordersRepository.getSetting("baku_base_price"),
+    ]);
+    const capacity = Number(capacitySetting);
     if (used + input.passengerCount > capacity) {
       throw new OrderError(`Bu reys artıq doludur. Boş yer: ${Math.max(capacity - used, 0)}.`, 409);
     }
 
-    const basePrice = Number(await ordersRepository.getSetting("baku_base_price"));
+    const basePrice = Number(basePriceSetting);
     const order = await ordersRepository.createBakuTrip({
       ...input,
       extraLuggagePrice: input.extraLuggage ? Number(input.extraLuggagePrice ?? 0) : 0,
@@ -161,20 +165,26 @@ export const ordersService = {
     const order = await ordersRepository.getOrderById(orderType, orderId);
     if (order.customer_id !== customerId) throw new OrderError("İcazəniz yoxdur.", 403);
 
-    await this._expireConfirmationIfNeeded(orderType, order);
-    const fresh = await ordersRepository.getOrderById(orderType, orderId);
+    const expired = await this._expireConfirmationIfNeeded(orderType, order);
+    // The expiry helper is the only code above that can change this order, so
+    // avoid a second database read for the normal polling path.
+    const fresh = expired ? await ordersRepository.getOrderById(orderType, orderId) : order;
 
-    const acceptedDrivers = await ordersRepository.listAcceptedDrivers(orderType, orderId);
+    const [acceptedDrivers, selectedRequest, confirmTimeout, acceptTimeout, maxIncrease, priceIncrease] = await Promise.all([
+      ordersRepository.listAcceptedDrivers(orderType, orderId),
+      fresh.selected_driver_id
+        ? ordersRepository.getDriverRequest(fresh.selected_driver_id, orderType, orderId)
+        : Promise.resolve(null),
+      ordersRepository.getSetting("driver_confirm_timeout_seconds"),
+      ordersRepository.getSetting("driver_accept_timeout_seconds"),
+      ordersRepository.getSetting("local_price_increase_max_count"),
+      ordersRepository.getSetting("local_price_increase_amount"),
+    ]);
 
-    let selectedRequest = null;
-    if (fresh.selected_driver_id) {
-      selectedRequest = await ordersRepository.getDriverRequest(fresh.selected_driver_id, orderType, orderId);
-    }
-
-    const confirmTimeoutSec = Number(await ordersRepository.getSetting("driver_confirm_timeout_seconds")) || 120;
-    const acceptTimeoutSec = Number(await ordersRepository.getSetting("driver_accept_timeout_seconds")) || 300;
-    const maxIncreaseCount = Number(await ordersRepository.getSetting("local_price_increase_max_count")) || 2;
-    const increaseAmount = Number(await ordersRepository.getSetting("local_price_increase_amount")) || 2;
+    const confirmTimeoutSec = Number(confirmTimeout) || 120;
+    const acceptTimeoutSec = Number(acceptTimeout) || 300;
+    const maxIncreaseCount = Number(maxIncrease) || 2;
+    const increaseAmount = Number(priceIncrease) || 2;
 
     return {
       order: fresh,
@@ -189,10 +199,10 @@ export const ordersService = {
 
   // Vaxtı keçmiş 2 dəqiqəlik təsdiqi avtomatik ləğv edir (Hissə 13: server vaxtına əsaslanır)
   async _expireConfirmationIfNeeded(orderType: string, order: any) {
-    if (order.status !== "WAITING_CONFIRMATION" || !order.selected_driver_id) return;
+    if (order.status !== "WAITING_CONFIRMATION" || !order.selected_driver_id) return false;
 
     const req = await ordersRepository.getDriverRequest(order.selected_driver_id, orderType, order.id);
-    if (!req?.selected_at) return;
+    if (!req?.selected_at) return false;
 
     const timeoutSec = Number(await ordersRepository.getSetting("driver_confirm_timeout_seconds")) || 120;
     const deadline = new Date(req.selected_at).getTime() + timeoutSec * 1000;
@@ -205,7 +215,9 @@ export const ordersService = {
         status: "WAITING_DRIVER",
         selected_driver_id: null,
       });
+      return true;
     }
+    return false;
   },
 
   async selectDriver(customerId: string, orderType: string, orderId: string, driverId: string) {
@@ -267,12 +279,16 @@ export const ordersService = {
     if (order.customer_id !== customerId) throw new OrderError("İcazəniz yoxdur.", 403);
     if (order.status !== "WAITING_DRIVER") throw new OrderError("Qiymət artırmaq mümkün deyil.", 409);
 
-    const maxCount = Number(await ordersRepository.getSetting("local_price_increase_max_count")) || 2;
+    const [maxCountSetting, incrementSetting] = await Promise.all([
+      ordersRepository.getSetting("local_price_increase_max_count"),
+      ordersRepository.getSetting("local_price_increase_amount"),
+    ]);
+    const maxCount = Number(maxCountSetting) || 2;
     if (order.price_increase_count >= maxCount) {
       throw new OrderError("Maksimum qiymət artırma sayına çatılıb.", 409);
     }
 
-    const increment = Number(await ordersRepository.getSetting("local_price_increase_amount")) || 2;
+    const increment = Number(incrementSetting) || 2;
     const updated = await ordersRepository.updateOrder("LOCAL", orderId, {
       price: Number(order.price) + increment,
       price_increase_count: order.price_increase_count + 1,

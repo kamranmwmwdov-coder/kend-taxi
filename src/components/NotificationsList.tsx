@@ -1,26 +1,38 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useSharedNotifications } from "@/components/SoundNotificationProvider";
 
 const TIME_LABEL = (iso: string) =>
   new Date(iso).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
 export function NotificationsList({ backHref }: { backHref: string }) {
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  async function load() {
-    const res = await fetch("/api/notifications");
-    const json = await res.json();
-    if (json.success) setItems(json.data.items);
-    setLoading(false);
-  }
+  const { items, loading, refresh } = useSharedNotifications();
+  const hasMarkedInitialItemsRead = useRef(false);
 
   useEffect(() => {
-    load();
-    fetch("/api/notifications/read", { method: "PUT", headers: { "Content-Type": "application/json" }, body: "{}" });
-  }, []);
+    if (loading || hasMarkedInitialItemsRead.current) return;
+
+    // Mark only the unread rows visible when this screen was opened. Calling the
+    // bulk operation could mark a notification that arrives mid-request.
+    const unreadIds = items.filter((item) => !item.is_read).map((item) => item.id);
+    hasMarkedInitialItemsRead.current = true;
+
+    async function markRead() {
+      await Promise.all(
+        unreadIds.map((notificationId) =>
+          fetch("/api/notifications/read", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ notificationId }),
+          }).catch(() => undefined)
+        )
+      );
+      await refresh();
+    }
+    void markRead();
+  }, [items, loading, refresh]);
 
   return (
     <main className="min-h-screen px-6 py-8 max-w-sm mx-auto">

@@ -146,9 +146,9 @@ export const ordersRepository = {
     const supabase = getSupabaseAdmin();
     const activeStatuses = ["NEW", "WAITING_DRIVER", "WAITING_CONFIRMATION", "ACTIVE"];
     const [baku, local, cargo] = await Promise.all([
-      supabase.from("baku_trip_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null),
-      supabase.from("local_trip_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null),
-      supabase.from("cargo_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null),
+      supabase.from("baku_trip_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null).limit(1),
+      supabase.from("local_trip_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null).limit(1),
+      supabase.from("cargo_orders").select("id").eq("customer_id", customerId).in("status", activeStatuses).is("deleted_at", null).limit(1),
     ]);
     return (baku.data?.length ?? 0) + (local.data?.length ?? 0) + (cargo.data?.length ?? 0) > 0;
   },
@@ -172,39 +172,39 @@ export const ordersRepository = {
 
   async getNewOrdersForDriver(driverId: string, activeServiceTypes: string[]) {
     const supabase = getSupabaseAdmin();
-    const results: any[] = [];
-
     const bakuTimes: Record<string, string> = {
       BAKU_MORNING: "MORNING", BAKU_NOON: "NOON", BAKU_EVENING: "EVENING",
     };
     const activeBakuTimes = activeServiceTypes.filter((s) => s in bakuTimes).map((s) => bakuTimes[s]);
 
-    if (activeBakuTimes.length > 0) {
-      const { data } = await supabase
+    const bakuQuery = activeBakuTimes.length > 0
+      ? supabase
         .from("baku_trip_orders")
         .select("*")
         .in("trip_time", activeBakuTimes)
         .eq("status", "WAITING_DRIVER")
-        .is("deleted_at", null);
-      (data ?? []).forEach((o) => results.push({ ...o, orderType: "BAKU", price: o.total_price }));
-    }
-
-    if (activeServiceTypes.includes("LOCAL")) {
-      const { data } = await supabase.from("local_trip_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null);
-      (data ?? []).forEach((o) => results.push({ ...o, orderType: "LOCAL" }));
-    }
-
-    if (activeServiceTypes.includes("CARGO")) {
-      const { data } = await supabase.from("cargo_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null);
-      (data ?? []).forEach((o) => results.push({ ...o, orderType: "CARGO" }));
-    }
-
-    // Bu sürücünün artıq rədd etdiyi sifarişləri çıxarırıq
-    const { data: responses } = await supabase
+        .is("deleted_at", null)
+      : Promise.resolve({ data: [] as any[] });
+    const localQuery = activeServiceTypes.includes("LOCAL")
+      ? supabase.from("local_trip_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
+      : Promise.resolve({ data: [] as any[] });
+    const cargoQuery = activeServiceTypes.includes("CARGO")
+      ? supabase.from("cargo_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
+      : Promise.resolve({ data: [] as any[] });
+    const responsesQuery = supabase
       .from("driver_order_requests")
       .select("order_type, order_id")
       .eq("driver_id", driverId)
       .in("status", ["ACCEPTED", "REJECTED"]);
+
+    const [baku, local, cargo, { data: responses }] = await Promise.all([bakuQuery, localQuery, cargoQuery, responsesQuery]);
+    const results = [
+      ...(baku.data ?? []).map((order) => ({ ...order, orderType: "BAKU", price: order.total_price })),
+      ...(local.data ?? []).map((order) => ({ ...order, orderType: "LOCAL" })),
+      ...(cargo.data ?? []).map((order) => ({ ...order, orderType: "CARGO" })),
+    ];
+
+    // Bu sürücünün artıq rədd etdiyi sifarişləri çıxarırıq
     const respondedSet = new Set((responses ?? []).map((r) => `${r.order_type}:${r.order_id}`));
 
     return results.filter((o) => !respondedSet.has(`${o.orderType}:${o.id}`));
@@ -319,16 +319,20 @@ export const ordersRepository = {
       .in("status", ["SELECTED", "CONFIRMED"]);
     if (error) throw error;
 
-    const results: any[] = [];
-    for (const req of requests ?? []) {
-      const order = await this.getOrderById(req.order_type, req.order_id).catch(() => null);
-      const isSelectedAndWaiting = req.status === "SELECTED" && order?.status === "WAITING_CONFIRMATION";
-      const isConfirmedAndActive = req.status === "CONFIRMED" && order?.status === "ACTIVE";
-      if (isSelectedAndWaiting || isConfirmedAndActive) {
-        results.push({ ...order, orderType: req.order_type, requestStatus: req.status, selectedAt: req.selected_at, price: order.total_price ?? order.price });
-      }
-    }
-    return results;
+    const resolvedOrders = await Promise.all(
+      (requests ?? []).map(async (request) => ({
+        request,
+        order: await this.getOrderById(request.order_type, request.order_id).catch(() => null),
+      }))
+    );
+
+    return resolvedOrders.flatMap(({ request, order }) => {
+      const isSelectedAndWaiting = request.status === "SELECTED" && order?.status === "WAITING_CONFIRMATION";
+      const isConfirmedAndActive = request.status === "CONFIRMED" && order?.status === "ACTIVE";
+      return isSelectedAndWaiting || isConfirmedAndActive
+        ? [{ ...order, orderType: request.order_type, requestStatus: request.status, selectedAt: request.selected_at, price: order!.total_price ?? order!.price }]
+        : [];
+    });
   },
 
   async getDriverHistory(driverId: string) {
@@ -340,13 +344,32 @@ export const ordersRepository = {
       .in("status", ["CONFIRMED", "CANCELLED", "EXPIRED"]);
     if (error) throw error;
 
-    const results: any[] = [];
-    for (const req of requests ?? []) {
-      const order = await this.getOrderById(req.order_type, req.order_id).catch(() => null);
-      if (order && ["COMPLETED", "CANCELLED"].includes(order.status)) {
-        results.push({ ...order, orderType: req.order_type, price: order.total_price ?? order.price });
-      }
-    }
+    const requestsByType = (requests ?? []).reduce<Record<string, string[]>>((groups, request) => {
+      (groups[request.order_type] ??= []).push(request.order_id);
+      return groups;
+    }, {});
+    const loadOrders = (table: "baku_trip_orders" | "local_trip_orders" | "cargo_orders", orderIds: string[] = []) =>
+      orderIds.length > 0
+        ? supabase.from(table).select("*").in("id", orderIds).is("deleted_at", null)
+        : Promise.resolve({ data: [] as any[] });
+    const [baku, local, cargo] = await Promise.all([
+      loadOrders("baku_trip_orders", requestsByType.BAKU),
+      loadOrders("local_trip_orders", requestsByType.LOCAL),
+      loadOrders("cargo_orders", requestsByType.CARGO),
+    ]);
+    const ordersByKey = new Map(
+      [
+        ...(baku.data ?? []).map((order) => [`BAKU:${order.id}`, order] as const),
+        ...(local.data ?? []).map((order) => [`LOCAL:${order.id}`, order] as const),
+        ...(cargo.data ?? []).map((order) => [`CARGO:${order.id}`, order] as const),
+      ]
+    );
+    const results = (requests ?? []).flatMap((request) => {
+      const order = ordersByKey.get(`${request.order_type}:${request.order_id}`);
+      return order && ["COMPLETED", "CANCELLED"].includes(order.status)
+        ? [{ ...order, orderType: request.order_type, price: order.total_price ?? order.price }]
+        : [];
+    });
     return results.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
   },
 };
