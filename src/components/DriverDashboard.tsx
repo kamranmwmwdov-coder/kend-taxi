@@ -59,12 +59,16 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
   }
 
   async function respond(orderType: string, orderId: string, action: "accept" | "reject") {
-    await fetch(`/api/driver/${action}`, {
+    const res = await fetch(`/api/driver/${action}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderType, orderId }),
     });
-    loadAll();
+    const json = await res.json();
+    if (json.success) {
+      setOrders((prev) => prev.filter((order) => !(order.orderType === orderType && order.id === orderId)));
+      loadAll();
+    }
   }
 
   async function driverAction(orderType: string, orderId: string, action: "confirm" | "cancel" | "complete") {

@@ -120,10 +120,20 @@ export const ordersService = {
 
   async driverAccept(userId: string, orderType: string, orderId: string) {
     const driverId = await ordersRepository.getDriverIdByUserId(userId);
+    const order = await ordersRepository.getOrderById(orderType, orderId);
+    if (order.status !== "WAITING_DRIVER") {
+      throw new OrderError("Order is no longer available for acceptance.", 409);
+    }
+    const existingRequest = await ordersRepository.getDriverRequest(driverId, orderType, orderId);
+    if (existingRequest?.status === "ACCEPTED") {
+      throw new OrderError("You have already accepted this order.", 409);
+    }
+    if (existingRequest?.status === "REJECTED") {
+      throw new OrderError("You have already rejected this order.", 409);
+    }
     await ordersRepository.createDriverResponse(driverId, orderType, orderId, "ACCEPTED");
     await logAudit({ userId, action: "ACCEPT_ORDER", module: "orders", meta: { orderType, orderId } });
 
-    const order = await ordersRepository.getOrderById(orderType, orderId);
     await notificationsService.create(
       order.customer_id,
       "Yeni sürücü tapıldı",
@@ -134,6 +144,13 @@ export const ordersService = {
 
   async driverReject(userId: string, orderType: string, orderId: string) {
     const driverId = await ordersRepository.getDriverIdByUserId(userId);
+    const existingRequest = await ordersRepository.getDriverRequest(driverId, orderType, orderId);
+    if (existingRequest?.status === "ACCEPTED") {
+      throw new OrderError("An accepted order cannot be rejected here.", 409);
+    }
+    if (existingRequest?.status === "REJECTED") {
+      throw new OrderError("You have already rejected this order.", 409);
+    }
     await ordersRepository.createDriverResponse(driverId, orderType, orderId, "REJECTED");
     await logAudit({ userId, action: "REJECT_ORDER", module: "orders", meta: { orderType, orderId } });
   },

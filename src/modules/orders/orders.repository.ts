@@ -200,14 +200,14 @@ export const ordersRepository = {
     }
 
     // Bu sürücünün artıq rədd etdiyi sifarişləri çıxarırıq
-    const { data: rejections } = await supabase
+    const { data: responses } = await supabase
       .from("driver_order_requests")
       .select("order_type, order_id")
       .eq("driver_id", driverId)
-      .eq("status", "REJECTED");
-    const rejectedSet = new Set((rejections ?? []).map((r) => `${r.order_type}:${r.order_id}`));
+      .in("status", ["ACCEPTED", "REJECTED"]);
+    const respondedSet = new Set((responses ?? []).map((r) => `${r.order_type}:${r.order_id}`));
 
-    return results.filter((o) => !rejectedSet.has(`${o.orderType}:${o.id}`));
+    return results.filter((o) => !respondedSet.has(`${o.orderType}:${o.id}`));
   },
 
   async createDriverResponse(driverId: string, orderType: string, orderId: string, status: "ACCEPTED" | "REJECTED") {
@@ -322,7 +322,11 @@ export const ordersRepository = {
     const results: any[] = [];
     for (const req of requests ?? []) {
       const order = await this.getOrderById(req.order_type, req.order_id).catch(() => null);
-      if (order) results.push({ ...order, orderType: req.order_type, requestStatus: req.status, selectedAt: req.selected_at, price: order.total_price ?? order.price });
+      const isSelectedAndWaiting = req.status === "SELECTED" && order?.status === "WAITING_CONFIRMATION";
+      const isConfirmedAndActive = req.status === "CONFIRMED" && order?.status === "ACTIVE";
+      if (isSelectedAndWaiting || isConfirmedAndActive) {
+        results.push({ ...order, orderType: req.order_type, requestStatus: req.status, selectedAt: req.selected_at, price: order.total_price ?? order.price });
+      }
     }
     return results;
   },
