@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { SoundToggle } from "@/components/SoundToggle";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { notificationSound } from "@/utils/notification-sound";
+import { normalizePhone } from "@/utils/phone";
 
 const SERVICE_LABELS: Record<string, string> = {
   BAKU_MORNING: "Bakı Səhər",
@@ -20,6 +21,43 @@ const SERVICE_LABELS: Record<string, string> = {
 interface ServiceRow {
   service_type: string;
   enabled: boolean;
+}
+
+function PhoneActions({ phone }: { phone: string }) {
+  const normalized = normalizePhone(phone);
+  const whatsappNumber = normalized.replace(/\D/g, "");
+
+  return (
+    <div className="flex gap-2">
+      <a href={`tel:${normalized}`} className="flex-1 min-h-[40px] rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center">
+        Zəng et
+      </a>
+      <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="flex-1 min-h-[40px] rounded-xl border border-gray-200 text-ink font-semibold text-sm flex items-center justify-center">
+        WhatsApp
+      </a>
+    </div>
+  );
+}
+
+function PassengerDetails({ order, active = false }: { order: any; active?: boolean }) {
+  const isLocal = order.orderType === "LOCAL";
+  return (
+    <>
+      <p className="font-semibold text-sm mb-1">{order.customerName || "Müştəri"}</p>
+      <p className="text-sm mb-1">{order.pickup_location} → {order.dropoff_location}</p>
+      <p className="text-sm text-ink-muted mb-1">{order.passenger_count ?? 1} sərnişin</p>
+      {isLocal && (
+        <p className="text-sm text-ink-muted mb-1">
+          {order.trip_type === "ROUND_TRIP" ? "Gediş-dönüş" : "Tək istiqamət"}
+          {order.trip_type === "ROUND_TRIP" && order.waiting_enabled && order.waiting_hours ? ` · Gözləmə: ${order.waiting_hours} saat` : ""}
+        </p>
+      )}
+      {order.extra_luggage && order.luggage_info && <p className="text-sm text-ink-muted mb-1">Yük: {order.luggage_info}</p>}
+      {active && <p className="text-sm text-ink-muted mb-2">{order.contact_phone}</p>}
+      <p className="font-bold text-ink mb-3">{order.price} AZN</p>
+      {active && <PhoneActions phone={order.contact_phone} />}
+    </>
+  );
 }
 
 export function DriverDashboard({ firstName }: { firstName: string }) {
@@ -188,17 +226,17 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
             <div key={`${o.orderType}-${o.id}`} className="bg-white rounded-2xl p-4 border border-gray-100">
               <p className="text-xs font-semibold text-primary mb-1">{ORDER_TYPE_LABEL[o.orderType]}</p>
 
-              {o.orderType === "BAKU" && (
-                <p className="text-sm mb-1">{o.pickup_location} → {o.dropoff_location} · {o.passenger_count} sərnişin</p>
-              )}
-              {o.orderType === "LOCAL" && (
-                <p className="text-sm mb-1">{o.pickup_location} → {o.dropoff_location}</p>
-              )}
+              {(o.orderType === "BAKU" || o.orderType === "LOCAL") && <PassengerDetails order={o} />}
               {o.orderType === "CARGO" && (
-                <p className="text-sm mb-1">{o.sender_address} → {o.receiver_address}</p>
+                <>
+                  <p className="text-sm mb-1">Yük: {o.cargo_info || "Məlumat verilməyib"}</p>
+                  <p className="text-sm mb-1">Götürülmə: {o.sender_address}</p>
+                  <p className="text-sm text-ink-muted mb-1">{o.sender_name} · {o.sender_phone}</p>
+                  <p className="text-sm mb-1">Çatdırılma: {o.receiver_address}</p>
+                  <p className="text-sm text-ink-muted mb-2">{o.receiver_name} · {o.receiver_phone}</p>
+                  <p className="font-bold text-ink mb-3">{o.price} AZN</p>
+                </>
               )}
-
-              <p className="font-bold text-ink mb-3">{o.total_price ?? o.price} AZN</p>
 
               <div className="flex gap-2">
                 <button
@@ -230,9 +268,24 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
           {activeOrders.map((o) => (
             <div key={`${o.orderType}-${o.id}`} className="bg-white rounded-2xl p-4 border border-gray-100">
               <p className="text-xs font-semibold text-primary mb-1">{ORDER_TYPE_LABEL[o.orderType]}</p>
-              <p className="text-sm mb-1">{o.pickup_location ?? o.sender_address} → {o.dropoff_location ?? o.receiver_address}</p>
-              <p className="text-sm text-ink-muted mb-2">{o.contact_phone ?? o.sender_phone}</p>
-              <p className="font-bold text-ink mb-3">{o.price} AZN</p>
+              {(o.orderType === "BAKU" || o.orderType === "LOCAL") && <PassengerDetails order={o} active />}
+              {o.orderType === "CARGO" && (
+                <>
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-ink-muted uppercase mb-1">Götürülmə</p>
+                    <p className="text-sm mb-1">{o.sender_address}</p>
+                    <p className="text-sm text-ink-muted mb-2">{o.sender_name} · {o.sender_phone}</p>
+                    <PhoneActions phone={o.sender_phone} />
+                  </div>
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-ink-muted uppercase mb-1">Çatdırılma</p>
+                    <p className="text-sm mb-1">{o.receiver_address}</p>
+                    <p className="text-sm text-ink-muted mb-2">{o.receiver_name} · {o.receiver_phone}</p>
+                    <PhoneActions phone={o.receiver_phone} />
+                  </div>
+                  <p className="font-bold text-ink mb-3">{o.price} AZN</p>
+                </>
+              )}
 
               {o.requestStatus === "SELECTED" && (
                 <>

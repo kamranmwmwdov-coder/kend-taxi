@@ -14,6 +14,7 @@ export default function LocalTripPage() {
     pickup: "", dropoff: "", phone: "",
     tripType: "ONE_WAY" as "ONE_WAY" | "ROUND_TRIP",
     waitingEnabled: false, waitingHours: "1",
+    passengerCount: 1, extraLuggage: false, luggageInfo: "",
     price: "", note: "",
   });
   const [error, setError] = useState("");
@@ -106,6 +107,43 @@ export default function LocalTripPage() {
             min={1}
             value={form.waitingHours}
             onChange={(e) => setForm({ ...form, waitingHours: e.target.value })}
+          />
+        )}
+
+        <Input
+          label="Sərnişin sayı"
+          type="number"
+          min={1}
+          max={10}
+          value={form.passengerCount}
+          onChange={(e) => setForm({ ...form, passengerCount: Number(e.target.value) })}
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-ink-muted mb-2">Əlavə yük varmı?</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, extraLuggage: true })}
+              className={`flex-1 min-h-[48px] rounded-xl border font-medium ${form.extraLuggage ? "bg-primary text-white border-primary" : "bg-white border-gray-200"}`}
+            >
+              Bəli
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, extraLuggage: false })}
+              className={`flex-1 min-h-[48px] rounded-xl border font-medium ${!form.extraLuggage ? "bg-primary text-white border-primary" : "bg-white border-gray-200"}`}
+            >
+              Xeyr
+            </button>
+          </div>
+        </div>
+
+        {form.extraLuggage && (
+          <Input
+            label="Yük haqqında qısa məlumat"
+            value={form.luggageInfo}
+            onChange={(e) => setForm({ ...form, luggageInfo: e.target.value })}
           />
         )}
 

@@ -105,6 +105,7 @@ export const ordersRepository = {
     pickup: string; dropoff: string; phone: string;
     tripType: "ONE_WAY" | "ROUND_TRIP";
     waitingEnabled: boolean; waitingHours?: number;
+    passengerCount: number; extraLuggage: boolean; luggageInfo?: string;
     price: number; note?: string;
   }) {
     const supabase = getSupabaseAdmin();
@@ -118,6 +119,9 @@ export const ordersRepository = {
         trip_type: input.tripType,
         waiting_enabled: input.waitingEnabled,
         waiting_hours: input.waitingEnabled ? input.waitingHours : null,
+        passenger_count: input.passengerCount,
+        extra_luggage: input.extraLuggage,
+        luggage_info: input.luggageInfo ?? null,
         price: input.price,
         note: input.note ?? null,
         status: "WAITING_DRIVER",
@@ -180,13 +184,13 @@ export const ordersRepository = {
     const bakuQuery = activeBakuTimes.length > 0
       ? supabase
         .from("baku_trip_orders")
-        .select("*")
+        .select("*, customer:users!baku_trip_orders_customer_id_fkey(first_name, last_name)")
         .in("trip_time", activeBakuTimes)
         .eq("status", "WAITING_DRIVER")
         .is("deleted_at", null)
       : Promise.resolve({ data: [] as any[] });
     const localQuery = activeServiceTypes.includes("LOCAL")
-      ? supabase.from("local_trip_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
+      ? supabase.from("local_trip_orders").select("*, customer:users!local_trip_orders_customer_id_fkey(first_name, last_name)").eq("status", "WAITING_DRIVER").is("deleted_at", null)
       : Promise.resolve({ data: [] as any[] });
     const cargoQuery = activeServiceTypes.includes("CARGO")
       ? supabase.from("cargo_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
@@ -199,8 +203,8 @@ export const ordersRepository = {
 
     const [baku, local, cargo, { data: responses }] = await Promise.all([bakuQuery, localQuery, cargoQuery, responsesQuery]);
     const results = [
-      ...(baku.data ?? []).map((order) => ({ ...order, orderType: "BAKU", price: order.total_price })),
-      ...(local.data ?? []).map((order) => ({ ...order, orderType: "LOCAL" })),
+      ...(baku.data ?? []).map((order) => ({ ...order, orderType: "BAKU", price: order.total_price, customerName: this._customerName(order.customer) })),
+      ...(local.data ?? []).map((order) => ({ ...order, orderType: "LOCAL", customerName: this._customerName(order.customer) })),
       ...(cargo.data ?? []).map((order) => ({ ...order, orderType: "CARGO" })),
     ];
 
@@ -234,11 +238,21 @@ export const ordersRepository = {
     throw new Error("Naməlum sifariş növü");
   },
 
+  _customerName(customer: any) {
+    return [customer?.first_name, customer?.last_name].filter(Boolean).join(" ");
+  },
+
+  _orderSelect(orderType: string) {
+    if (orderType === "BAKU") return "*, customer:users!baku_trip_orders_customer_id_fkey(first_name, last_name)";
+    if (orderType === "LOCAL") return "*, customer:users!local_trip_orders_customer_id_fkey(first_name, last_name)";
+    return "*";
+  },
+
   async getOrderById(orderType: string, orderId: string) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from(this._tableName(orderType))
-      .select("*")
+      .select(this._orderSelect(orderType))
       .eq("id", orderId)
       .is("deleted_at", null)
       .single();
@@ -330,7 +344,14 @@ export const ordersRepository = {
       const isSelectedAndWaiting = request.status === "SELECTED" && order?.status === "WAITING_CONFIRMATION";
       const isConfirmedAndActive = request.status === "CONFIRMED" && order?.status === "ACTIVE";
       return isSelectedAndWaiting || isConfirmedAndActive
-        ? [{ ...order, orderType: request.order_type, requestStatus: request.status, selectedAt: request.selected_at, price: order!.total_price ?? order!.price }]
+        ? [{
+            ...order,
+            orderType: request.order_type,
+            requestStatus: request.status,
+            selectedAt: request.selected_at,
+            price: order!.total_price ?? order!.price,
+            customerName: this._customerName(order?.customer),
+          }]
         : [];
     });
   },

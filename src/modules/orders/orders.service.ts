@@ -77,9 +77,11 @@ export const ordersService = {
     pickup: string; dropoff: string; phone: string;
     tripType: "ONE_WAY" | "ROUND_TRIP";
     waitingEnabled: boolean; waitingHours?: number;
+    passengerCount: number; extraLuggage: boolean; luggageInfo?: string;
     price: number; note?: string;
   }) {
     if (!input.pickup || !input.dropoff) throw new OrderError("Ünvanlar tələb olunur.", 422);
+    if (input.passengerCount < 1) throw new OrderError("Passenger count must be at least 1.", 422);
     if (input.waitingEnabled && !input.waitingHours) {
       throw new OrderError("Gözləmə müddəti seçilməlidir.", 422);
     }
