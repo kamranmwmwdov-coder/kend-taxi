@@ -184,13 +184,13 @@ export const ordersRepository = {
     const bakuQuery = activeBakuTimes.length > 0
       ? supabase
         .from("baku_trip_orders")
-        .select("*, customer:users!baku_trip_orders_customer_id_fkey(first_name, last_name)")
+        .select("*")
         .in("trip_time", activeBakuTimes)
         .eq("status", "WAITING_DRIVER")
         .is("deleted_at", null)
       : Promise.resolve({ data: [] as any[] });
     const localQuery = activeServiceTypes.includes("LOCAL")
-      ? supabase.from("local_trip_orders").select("*, customer:users!local_trip_orders_customer_id_fkey(first_name, last_name)").eq("status", "WAITING_DRIVER").is("deleted_at", null)
+      ? supabase.from("local_trip_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
       : Promise.resolve({ data: [] as any[] });
     const cargoQuery = activeServiceTypes.includes("CARGO")
       ? supabase.from("cargo_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
@@ -202,9 +202,13 @@ export const ordersRepository = {
       .in("status", ["ACCEPTED", "REJECTED"]);
 
     const [baku, local, cargo, { data: responses }] = await Promise.all([bakuQuery, localQuery, cargoQuery, responsesQuery]);
+    const customerNames = await this._customerNamesById([
+      ...(baku.data ?? []),
+      ...(local.data ?? []),
+    ].map((order) => order.customer_id));
     const results = [
-      ...(baku.data ?? []).map((order) => ({ ...order, orderType: "BAKU", price: order.total_price, customerName: this._customerName(order.customer) })),
-      ...(local.data ?? []).map((order) => ({ ...order, orderType: "LOCAL", customerName: this._customerName(order.customer) })),
+      ...(baku.data ?? []).map((order) => ({ ...order, orderType: "BAKU", price: order.total_price, customerName: customerNames.get(order.customer_id) ?? "" })),
+      ...(local.data ?? []).map((order) => ({ ...order, orderType: "LOCAL", customerName: customerNames.get(order.customer_id) ?? "" })),
       ...(cargo.data ?? []).map((order) => ({ ...order, orderType: "CARGO" })),
     ];
 
@@ -242,17 +246,25 @@ export const ordersRepository = {
     return [customer?.first_name, customer?.last_name].filter(Boolean).join(" ");
   },
 
-  _orderSelect(orderType: string) {
-    if (orderType === "BAKU") return "*, customer:users!baku_trip_orders_customer_id_fkey(first_name, last_name)";
-    if (orderType === "LOCAL") return "*, customer:users!local_trip_orders_customer_id_fkey(first_name, last_name)";
-    return "*";
+  async _customerNamesById(customerIds: Array<string | null | undefined>) {
+    const ids = [...new Set(customerIds.filter((id): id is string => Boolean(id)))];
+    if (ids.length === 0) return new Map<string, string>();
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, first_name, last_name")
+      .in("id", ids);
+    if (error) throw error;
+
+    return new Map((data ?? []).map((customer) => [customer.id, this._customerName(customer)]));
   },
 
   async getOrderById(orderType: string, orderId: string) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from(this._tableName(orderType))
-      .select(this._orderSelect(orderType))
+      .select("*")
       .eq("id", orderId)
       .is("deleted_at", null)
       .single();
@@ -339,6 +351,9 @@ export const ordersRepository = {
         order: await this.getOrderById(request.order_type, request.order_id).catch(() => null),
       }))
     );
+    const customerNames = await this._customerNamesById(
+      resolvedOrders.map(({ order }) => order?.customer_id)
+    );
 
     return resolvedOrders.flatMap(({ request, order }) => {
       const isSelectedAndWaiting = request.status === "SELECTED" && order?.status === "WAITING_CONFIRMATION";
@@ -350,7 +365,7 @@ export const ordersRepository = {
             requestStatus: request.status,
             selectedAt: request.selected_at,
             price: order!.total_price ?? order!.price,
-            customerName: this._customerName(order?.customer),
+            customerName: customerNames.get(order!.customer_id) ?? "",
           }]
         : [];
     });
@@ -378,11 +393,11 @@ export const ordersRepository = {
       loadOrders("local_trip_orders", requestsByType.LOCAL),
       loadOrders("cargo_orders", requestsByType.CARGO),
     ]);
-    const ordersByKey = new Map(
+    const ordersByKey = new Map<string, any>(
       [
-        ...(baku.data ?? []).map((order) => [`BAKU:${order.id}`, order] as const),
-        ...(local.data ?? []).map((order) => [`LOCAL:${order.id}`, order] as const),
-        ...(cargo.data ?? []).map((order) => [`CARGO:${order.id}`, order] as const),
+        ...(baku.data ?? []).map((order): [string, any] => [`BAKU:${order.id}`, order]),
+        ...(local.data ?? []).map((order): [string, any] => [`LOCAL:${order.id}`, order]),
+        ...(cargo.data ?? []).map((order): [string, any] => [`CARGO:${order.id}`, order]),
       ]
     );
     const results = (requests ?? []).flatMap((request) => {
