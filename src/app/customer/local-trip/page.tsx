@@ -111,43 +111,6 @@ export default function LocalTripPage() {
         )}
 
         <Input
-          label="Sərnişin sayı"
-          type="number"
-          min={1}
-          max={10}
-          value={form.passengerCount}
-          onChange={(e) => setForm({ ...form, passengerCount: Number(e.target.value) })}
-        />
-
-        <div>
-          <label className="block text-sm font-medium text-ink-muted mb-2">Əlavə yük varmı?</label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, extraLuggage: true })}
-              className={`flex-1 min-h-[48px] rounded-xl border font-medium ${form.extraLuggage ? "bg-primary text-white border-primary" : "bg-white border-gray-200"}`}
-            >
-              Bəli
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, extraLuggage: false })}
-              className={`flex-1 min-h-[48px] rounded-xl border font-medium ${!form.extraLuggage ? "bg-primary text-white border-primary" : "bg-white border-gray-200"}`}
-            >
-              Xeyr
-            </button>
-          </div>
-        </div>
-
-        {form.extraLuggage && (
-          <Input
-            label="Yük haqqında qısa məlumat"
-            value={form.luggageInfo}
-            onChange={(e) => setForm({ ...form, luggageInfo: e.target.value })}
-          />
-        )}
-
-        <Input
           label="Qiymət (AZN) — yol haqqı və gözləmə daxil olmaqla özünüz təklif edin"
           type="number"
           min={1}
