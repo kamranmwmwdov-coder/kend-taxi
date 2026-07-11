@@ -157,6 +157,27 @@ export const ordersRepository = {
     return (baku.data?.length ?? 0) + (local.data?.length ?? 0) + (cargo.data?.length ?? 0) > 0;
   },
 
+  async expireWaitingDriverOrders() {
+    const supabase = getSupabaseAdmin();
+    const now = new Date().toISOString();
+    const cutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const expire = (table: "baku_trip_orders" | "local_trip_orders" | "cargo_orders") =>
+      supabase
+        .from(table)
+        .update({ status: "EXPIRED", updated_at: now })
+        .eq("status", "WAITING_DRIVER")
+        .lt("created_at", cutoff)
+        .is("deleted_at", null);
+
+    const results = await Promise.all([
+      expire("baku_trip_orders"),
+      expire("local_trip_orders"),
+      expire("cargo_orders"),
+    ]);
+    const error = results.find((result) => result.error)?.error;
+    if (error) throw error;
+  },
+
   async getDriverServices(driverId: string) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.from("driver_services").select("*").eq("driver_id", driverId);

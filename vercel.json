@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/internal/expire-waiting-driver-orders",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
