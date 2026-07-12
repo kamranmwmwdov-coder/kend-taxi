@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { SoundToggle } from "@/components/SoundToggle";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { notificationSound } from "@/utils/notification-sound";
+import { PushPermissionButton } from "@/components/PushPermissionButton";
 import { normalizePhone } from "@/utils/phone";
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -126,7 +127,7 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
 
   useEffect(() => {
     loadAll();
-    const interval = setInterval(loadAll, 10000); // növbəti mərhələdə Realtime ilə əvəz olunacaq
+    const interval = setInterval(loadAll, 5000); // növbəti mərhələdə Realtime ilə əvəz olunacaq
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") void loadAll();
     };
@@ -191,6 +192,7 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
       </div>
 
       <AnnouncementBanner />
+      <PushPermissionButton />
 
       <section className="mb-8">
         <h2 className="font-semibold text-sm text-ink-muted uppercase tracking-wide mb-3">Aktiv Reyslər</h2>

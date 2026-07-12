@@ -1,6 +1,17 @@
 import { ordersRepository } from "./orders.repository";
 import { logAudit } from "@/modules/logs/logs.service";
 import { notificationsService } from "@/modules/notifications/notifications.service";
+import { pushService } from "@/modules/push/push.service";
+
+async function notifyEligibleDriversOfNewOrder(orderType: "BAKU" | "LOCAL" | "CARGO", order: any) {
+  try {
+    const userIds = await ordersRepository.getEligibleDriverUserIdsForNewOrder(orderType, order.trip_time);
+    await pushService.sendNewOrderOffer(userIds, orderType, order.id);
+  } catch (error) {
+    // Push delivery is supplemental; order creation and polling must continue if it fails.
+    console.error("New-order push notification failed:", error);
+  }
+}
 
 export class OrderError extends Error {
   constructor(message: string, public status = 400) {
@@ -46,6 +57,7 @@ export const ordersService = {
     });
 
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "BAKU", orderId: order.id } });
+    await notifyEligibleDriversOfNewOrder("BAKU", order);
     return order;
   },
 
@@ -69,6 +81,7 @@ export const ordersService = {
 
     const order = await ordersRepository.createCargo(input);
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "CARGO", orderId: order.id } });
+    await notifyEligibleDriversOfNewOrder("CARGO", order);
     return order;
   },
 
@@ -77,11 +90,9 @@ export const ordersService = {
     pickup: string; dropoff: string; phone: string;
     tripType: "ONE_WAY" | "ROUND_TRIP";
     waitingEnabled: boolean; waitingHours?: number;
-    passengerCount: number; extraLuggage: boolean; luggageInfo?: string;
     price: number; note?: string;
   }) {
     if (!input.pickup || !input.dropoff) throw new OrderError("Ünvanlar tələb olunur.", 422);
-    if (input.passengerCount < 1) throw new OrderError("Passenger count must be at least 1.", 422);
     if (input.waitingEnabled && !input.waitingHours) {
       throw new OrderError("Gözləmə müddəti seçilməlidir.", 422);
     }
@@ -93,6 +104,7 @@ export const ordersService = {
 
     const order = await ordersRepository.createLocalTrip(input);
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "LOCAL", orderId: order.id } });
+    await notifyEligibleDriversOfNewOrder("LOCAL", order);
     return order;
   },
 

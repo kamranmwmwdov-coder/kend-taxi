@@ -14,7 +14,6 @@ export default function LocalTripPage() {
     pickup: "", dropoff: "", phone: "",
     tripType: "ONE_WAY" as "ONE_WAY" | "ROUND_TRIP",
     waitingEnabled: false, waitingHours: "1",
-    passengerCount: 1, extraLuggage: false, luggageInfo: "",
     price: "", note: "",
   });
   const [error, setError] = useState("");
