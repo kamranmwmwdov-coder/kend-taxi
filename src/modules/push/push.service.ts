@@ -16,7 +16,11 @@ function configureVapid() {
 }
 
 export const pushService = {
+<<<<<<< HEAD
   async sendNewOrderOffer(userIds: string[], orderType: "BAKU" | "LOCAL" | "CARGO", order: any) {
+=======
+  async sendNewOrderOffer(userIds: string[], orderType: "BAKU" | "LOCAL" | "CARGO", orderId: string) {
+>>>>>>> ee4ea058ba01ac6009a6168432ac2726f4c97921
     if (userIds.length === 0) return;
     configureVapid();
 
@@ -28,6 +32,7 @@ export const pushService = {
     if (error) throw error;
 
     const subscriptions = [...new Map((rows ?? []).map((row) => [row.endpoint, row])).values()];
+<<<<<<< HEAD
     const orderTypeLabel = { BAKU: "Bakı reysi", LOCAL: "Rayon daxili", CARGO: "El yükü" }[orderType];
     const tripTimeLabel: Record<string, string> = { MORNING: "Səhər", NOON: "Günorta", EVENING: "Axşam" };
     const pickup = order.pickup_location ?? order.sender_address;
@@ -43,6 +48,14 @@ export const pushService = {
       body: details.join(" · "),
       url: "/driver/home",
       tag: `order-offer:${orderType}:${order.id}`,
+=======
+    const payload = JSON.stringify({
+      type: "ORDER_OFFER",
+      title: "Yeni sifariş",
+      body: "Sizə uyğun yeni sifariş var.",
+      url: "/driver/home",
+      tag: `order-offer:${orderType}:${orderId}`,
+>>>>>>> ee4ea058ba01ac6009a6168432ac2726f4c97921
     });
 
     const results = await Promise.allSettled(
