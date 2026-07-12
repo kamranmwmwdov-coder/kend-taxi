@@ -239,6 +239,45 @@ export const ordersRepository = {
     return results.filter((o) => !respondedSet.has(`${o.orderType}:${o.id}`));
   },
 
+  async getEligibleDriverUserIdsForNewOrder(orderType: "BAKU" | "LOCAL" | "CARGO", tripTime?: string) {
+    const serviceType = orderType === "BAKU"
+      ? ({ MORNING: "BAKU_MORNING", NOON: "BAKU_NOON", EVENING: "BAKU_EVENING" }[tripTime ?? ""] ?? null)
+      : orderType;
+    if (!serviceType) return [];
+
+    const supabase = getSupabaseAdmin();
+    const { data: serviceRows, error: servicesError } = await supabase
+      .from("driver_services")
+      .select("driver_id")
+      .eq("service_type", serviceType)
+      .eq("enabled", true);
+    if (servicesError) throw servicesError;
+
+    const driverIds = [...new Set((serviceRows ?? []).map((row) => row.driver_id))];
+    if (driverIds.length === 0) return [];
+
+    const { data: drivers, error: driversError } = await supabase
+      .from("drivers")
+      .select("user_id")
+      .in("id", driverIds)
+      .eq("is_active", true)
+      .is("deleted_at", null);
+    if (driversError) throw driversError;
+
+    const candidateUserIds = [...new Set((drivers ?? []).map((driver) => driver.user_id))];
+    if (candidateUserIds.length === 0) return [];
+
+    const { data: users, error: usersError } = await supabase
+      .from("users")
+      .select("id")
+      .in("id", candidateUserIds)
+      .eq("role", "DRIVER")
+      .eq("status", "ACTIVE")
+      .is("deleted_at", null);
+    if (usersError) throw usersError;
+    return [...new Set((users ?? []).map((user) => user.id))];
+  },
+
   async createDriverResponse(driverId: string, orderType: string, orderId: string, status: "ACCEPTED" | "REJECTED") {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase.from("driver_order_requests").upsert(
