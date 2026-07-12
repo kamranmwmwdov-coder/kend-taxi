@@ -16,7 +16,7 @@ function configureVapid() {
 }
 
 export const pushService = {
-  async sendNewOrderOffer(userIds: string[], orderType: "BAKU" | "LOCAL" | "CARGO", orderId: string) {
+  async sendNewOrderOffer(userIds: string[], orderType: "BAKU" | "LOCAL" | "CARGO", order: any) {
     if (userIds.length === 0) return;
     configureVapid();
 
@@ -28,12 +28,21 @@ export const pushService = {
     if (error) throw error;
 
     const subscriptions = [...new Map((rows ?? []).map((row) => [row.endpoint, row])).values()];
+    const orderTypeLabel = { BAKU: "Bakı reysi", LOCAL: "Rayon daxili", CARGO: "El yükü" }[orderType];
+    const tripTimeLabel: Record<string, string> = { MORNING: "Səhər", NOON: "Günorta", EVENING: "Axşam" };
+    const pickup = order.pickup_location ?? order.sender_address;
+    const destination = order.dropoff_location ?? order.receiver_address;
+    const details = [
+      pickup && destination ? `${pickup} → ${destination}` : null,
+      order.total_price ?? order.price ? `${order.total_price ?? order.price} AZN` : null,
+      order.trip_time ? tripTimeLabel[order.trip_time] : null,
+    ].filter(Boolean);
     const payload = JSON.stringify({
       type: "ORDER_OFFER",
-      title: "Yeni sifariş",
-      body: "Sizə uyğun yeni sifariş var.",
+      title: `Yeni sifariş · ${orderTypeLabel}`,
+      body: details.join(" · "),
       url: "/driver/home",
-      tag: `order-offer:${orderType}:${orderId}`,
+      tag: `order-offer:${orderType}:${order.id}`,
     });
 
     const results = await Promise.allSettled(
