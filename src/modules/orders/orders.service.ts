@@ -6,7 +6,11 @@ import { pushService } from "@/modules/push/push.service";
 async function notifyEligibleDriversOfNewOrder(orderType: "BAKU" | "LOCAL" | "CARGO", order: any) {
   try {
     const userIds = await ordersRepository.getEligibleDriverUserIdsForNewOrder(orderType, order.trip_time);
+<<<<<<< HEAD
     await pushService.sendNewOrderOffer(userIds, orderType, order);
+=======
+    await pushService.sendNewOrderOffer(userIds, orderType, order.id);
+>>>>>>> ee4ea058ba01ac6009a6168432ac2726f4c97921
   } catch (error) {
     // Push delivery is supplemental; order creation and polling must continue if it fails.
     console.error("New-order push notification failed:", error);
