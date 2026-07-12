@@ -3,8 +3,15 @@ import { Car, Truck } from "lucide-react";
 import { AdBanner } from "@/components/AdBanner";
 import { SplashScreen } from "@/components/SplashScreen";
 import { getPublicSettings } from "@/modules/settings/settings.service";
+import { getSession } from "@/utils/session";
+import { redirect } from "next/navigation";
 
 export default async function EntryPage() {
+  const session = await getSession();
+  if (session?.role === "CUSTOMER") redirect("/customer/home");
+  if (session?.role === "DRIVER") redirect("/driver/home");
+  if (session?.role === "ADMIN") redirect("/admin");
+
   const { appName } = await getPublicSettings();
   const initials = appName
     .split(" ")
