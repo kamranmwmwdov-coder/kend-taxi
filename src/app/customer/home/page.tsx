@@ -6,6 +6,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { SoundToggle } from "@/components/SoundToggle";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { AdBanner } from "@/components/AdBanner";
+import { PushPermissionButton } from "@/components/PushPermissionButton";
 import { Bus, Package, Car, History, User } from "lucide-react";
 
 const CARDS = [
@@ -32,6 +33,7 @@ export default async function CustomerHomePage() {
       </div>
 
       <AnnouncementBanner />
+      <PushPermissionButton />
       <div className="mb-6 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
         <AdBanner targetRole="CUSTOMER" />
       </div>
