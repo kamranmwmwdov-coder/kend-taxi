@@ -6,8 +6,9 @@ import { notificationSound, type SoundEvent } from "@/utils/notification-sound";
 const FOREGROUND_POLL_INTERVAL_MS = 5_000;
 const BACKGROUND_POLL_INTERVAL_MS = 30_000;
 const STATE_EVENT = "kt-notifications-state-change";
+export const NOTIFICATION_ARRIVED_EVENT = "notification-arrived";
 
-type NotificationItem = { id: string; type: string; is_read: boolean; created_at: string; title: string; message: string };
+export type NotificationItem = { id: string; type: string; is_read: boolean; created_at: string; title: string; message: string };
 type NotificationState = { items: NotificationItem[]; unreadCount: number; loading: boolean };
 
 let sharedState: NotificationState = { items: [], unreadCount: 0, loading: true };
