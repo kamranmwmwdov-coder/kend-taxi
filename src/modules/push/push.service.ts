@@ -144,4 +144,39 @@ export const pushService = {
       tag: `order-status:driver-confirmed:${order.id}`,
     });
   },
+
+  async sendNotificationToUsers(userIds: string[], title: string, body: string, url: string, tag: string) {
+    if (userIds.length === 0) return;
+    configureVapid();
+
+    const { data: rows, error } = await getSupabaseAdmin()
+      .from("push_subscriptions")
+      .select("endpoint, p256dh, auth")
+      .in("user_id", [...new Set(userIds)])
+      .is("deleted_at", null);
+    if (error) throw error;
+
+    const subscriptions = [...new Map((rows ?? []).map((row) => [row.endpoint, row])).values()];
+    const payload = JSON.stringify({ title, body, url, tag });
+    const results = await Promise.allSettled(
+      subscriptions.map((subscription) =>
+        webPush.sendNotification(
+          { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+          payload
+        )
+      )
+    );
+
+    const invalidEndpoints = results.flatMap((result, index) => {
+      if (result.status === "fulfilled") return [];
+      const statusCode = (result.reason as { statusCode?: number })?.statusCode;
+      return statusCode === 404 || statusCode === 410 ? [subscriptions[index].endpoint] : [];
+    });
+    if (invalidEndpoints.length > 0) {
+      await getSupabaseAdmin()
+        .from("push_subscriptions")
+        .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .in("endpoint", invalidEndpoints);
+    }
+  },
 };
