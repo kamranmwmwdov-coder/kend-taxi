@@ -26,6 +26,18 @@ export function PushPermissionButton() {
       return;
     }
     setPermission(Notification.permission);
+
+    if (Notification.permission !== "granted") return;
+
+    void (async () => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) return;
+
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) await saveSubscription(subscription);
+    })().catch(() => {
+      // Keep the permission control usable if an existing subscription cannot be synchronized.
+    });
   }, []);
 
   async function saveSubscription(subscription: PushSubscription) {

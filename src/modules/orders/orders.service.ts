@@ -56,6 +56,7 @@ export const ordersService = {
       basePrice,
     });
 
+    await notifyEligibleDriversOfNewOrder("BAKU", order);
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "BAKU", orderId: order.id } });
     return order;
   },
@@ -79,6 +80,7 @@ export const ordersService = {
     }
 
     const order = await ordersRepository.createCargo(input);
+    await notifyEligibleDriversOfNewOrder("CARGO", order);
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "CARGO", orderId: order.id } });
     return order;
   },
@@ -103,6 +105,7 @@ export const ordersService = {
     }
 
     const order = await ordersRepository.createLocalTrip(input);
+    await notifyEligibleDriversOfNewOrder("LOCAL", order);
     await logAudit({ userId: input.customerId, action: "CREATE_ORDER", module: "orders", meta: { type: "LOCAL", orderId: order.id } });
     return order;
   },
@@ -338,6 +341,18 @@ export const ordersService = {
       "Sizi seçdiyiniz sürücü sifarişi təsdiqlədi.",
       "DRIVER_CONFIRMED"
     );
+    try {
+      await pushService.sendNotificationToUsers(
+        [fresh.customer_id],
+        "Sürücü yoldadır",
+        "Sürücü sifarişinizi qəbul etdi və yola düşür.",
+        `/customer/orders/${orderType.toLowerCase()}/${orderId}`,
+        `order-status:driver-confirmed:${orderId}`
+      );
+    } catch (error) {
+      // Push delivery is supplemental; confirmation and polling must continue if it fails.
+      console.error("Customer driver-confirmed push notification failed:", error);
+    }
   },
 
   async driverCancel(userId: string, orderType: string, orderId: string) {
