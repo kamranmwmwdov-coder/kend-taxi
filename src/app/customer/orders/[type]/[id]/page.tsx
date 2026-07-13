@@ -158,7 +158,11 @@ export default function OrderStatusPage() {
           <p className="font-semibold text-success mb-3">Sürücü yoldadır</p>
           {selectedRequest?.driver?.user?.phone && (
             <div className="bg-white rounded-xl p-3">
-              <p className="text-xs text-ink-muted">Sürücünün nömrəsi</p>
+              <p className="text-xs text-ink-muted">Sürücü</p>
+              <p className="font-semibold">
+                {selectedRequest.driver.user.first_name} {selectedRequest.driver.user.last_name}
+              </p>
+              <p className="text-xs text-ink-muted mt-2">Nömrəsi</p>
               <p className="font-semibold mb-3">{normalizePhone(selectedRequest.driver.user.phone)}</p>
               <div className="flex gap-2">
                 <a
