@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Countdown } from "@/components/Countdown";
 import { notificationSound } from "@/utils/notification-sound";
+import { normalizePhone } from "@/utils/phone";
 
 const STATUS_LABEL: Record<string, string> = {
   NEW: "Yeni",
@@ -154,7 +155,33 @@ export default function OrderStatusPage() {
       {/* Aktiv sifariş - sürücü məlumatları tam görünür */}
       {order.status === "ACTIVE" && (
         <div className="bg-success/10 rounded-2xl p-5">
-          <p className="font-semibold text-success">Sürücü yoldadır</p>
+          <p className="font-semibold text-success mb-3">Sürücü yoldadır</p>
+          {selectedRequest?.driver?.user?.phone && (
+            <div className="bg-white rounded-xl p-3">
+              <p className="text-xs text-ink-muted">Sürücü</p>
+              <p className="font-semibold">
+                {selectedRequest.driver.user.first_name} {selectedRequest.driver.user.last_name}
+              </p>
+              <p className="text-xs text-ink-muted mt-2">Nömrəsi</p>
+              <p className="font-semibold mb-3">{normalizePhone(selectedRequest.driver.user.phone)}</p>
+              <div className="flex gap-2">
+                <a
+                  href={`tel:${normalizePhone(selectedRequest.driver.user.phone)}`}
+                  className="flex-1 min-h-[40px] rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center"
+                >
+                  Zəng et
+                </a>
+                <a
+                  href={`https://wa.me/${normalizePhone(selectedRequest.driver.user.phone).replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 min-h-[40px] rounded-xl border border-gray-200 text-ink font-semibold text-sm flex items-center justify-center"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

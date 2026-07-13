@@ -371,7 +371,11 @@ export const ordersRepository = {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("driver_order_requests")
-      .select("*")
+      .select(
+        `*,
+         driver:drivers(id, user:users!drivers_user_id_fkey(first_name, last_name, phone),
+           vehicle:vehicles(brand, color, plate_number))`
+      )
       .eq("driver_id", driverId)
       .eq("order_type", orderType)
       .eq("order_id", orderId)
