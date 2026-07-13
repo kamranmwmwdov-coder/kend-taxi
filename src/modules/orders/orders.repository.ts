@@ -21,6 +21,17 @@ export const ordersRepository = {
     return data.user_id as string;
   },
 
+  async getDriverVehicle(driverId: string) {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("drivers")
+      .select("vehicle:vehicles(brand, model, color, plate_number)")
+      .eq("id", driverId)
+      .single();
+    if (error) throw error;
+    return Array.isArray(data.vehicle) ? data.vehicle[0] ?? null : data.vehicle;
+  },
+
   async getBakuTripSeatUsage(tripDate: string, tripTime: string) {
     const supabase = getSupabaseAdmin();
     const activeStatuses = ["NEW", "WAITING_DRIVER", "WAITING_CONFIRMATION", "ACTIVE"];
