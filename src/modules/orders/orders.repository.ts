@@ -216,8 +216,6 @@ export const ordersRepository = {
         .in("trip_time", activeBakuTimes)
         .eq("status", "WAITING_DRIVER")
         .is("deleted_at", null)
-        .order("trip_date", { ascending: true })
-        .order("trip_time", { ascending: true })
       : Promise.resolve({ data: [] as any[] });
     const localQuery = activeServiceTypes.includes("LOCAL")
       ? supabase.from("local_trip_orders").select("*").eq("status", "WAITING_DRIVER").is("deleted_at", null)
@@ -373,7 +371,11 @@ export const ordersRepository = {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("driver_order_requests")
-      .select("*")
+      .select(
+        `*,
+         driver:drivers(id, user:users!drivers_user_id_fkey(first_name, last_name, phone),
+           vehicle:vehicles(brand, color, plate_number))`
+      )
       .eq("driver_id", driverId)
       .eq("order_type", orderType)
       .eq("order_id", orderId)
