@@ -8,7 +8,14 @@ type PushPayload = {
   body: string;
   url: string;
   tag: string;
-  type: "ORDER_OFFER" | "DRIVER_CONFIRMED";
+  type:
+    | "ORDER_OFFER"
+    | "DRIVER_CONFIRMED"
+    | "DRIVER_ACCEPTED"
+    | "CUSTOMER_SELECTED"
+    | "ORDER_CANCELLED"
+    | "DRIVER_CANCELLED"
+    | "ORDER_COMPLETED";
 };
 
 type Vehicle = {
@@ -142,6 +149,56 @@ export const pushService = {
         .join("\n"),
       url: `/customer/orders/${orderType.toLowerCase()}/${order.id}`,
       tag: `order-status:driver-confirmed:${order.id}`,
+    });
+  },
+
+  async sendDriverAccepted(userIds: string[], orderType: OrderType, order: Record<string, unknown>) {
+    await sendToUsers(userIds, {
+      type: "DRIVER_ACCEPTED",
+      title: "Yeni sürücü tapıldı",
+      body: [orderTypeLabel(orderType), ...orderDetails(orderType, order)].join("\n"),
+      url: `/customer/orders/${orderType.toLowerCase()}/${order.id}`,
+      tag: `order-status:driver-accepted:${order.id}`,
+    });
+  },
+
+  async sendCustomerSelected(userIds: string[], orderType: OrderType, order: Record<string, unknown>) {
+    await sendToUsers(userIds, {
+      type: "CUSTOMER_SELECTED",
+      title: "Müştəri sizi seçdi",
+      body: ["Təsdiq üçün 2 dəqiqə vaxtınız var.", orderTypeLabel(orderType), ...orderDetails(orderType, order)].join("\n"),
+      url: "/driver/home",
+      tag: `order-status:customer-selected:${order.id}`,
+    });
+  },
+
+  async sendOrderCancelledByCustomer(userIds: string[], orderType: OrderType, order: Record<string, unknown>) {
+    await sendToUsers(userIds, {
+      type: "ORDER_CANCELLED",
+      title: "Sifariş ləğv edildi",
+      body: ["Müştəri sifarişi ləğv etdi.", orderTypeLabel(orderType)].join("\n"),
+      url: "/driver/home",
+      tag: `order-status:cancelled-by-customer:${order.id}`,
+    });
+  },
+
+  async sendOrderCancelledByDriver(userIds: string[], orderType: OrderType, order: Record<string, unknown>) {
+    await sendToUsers(userIds, {
+      type: "DRIVER_CANCELLED",
+      title: "Sürücü imtina etdi",
+      body: ["Sürücü sifarişdən imtina etdi. Başqa sürücü seçə bilərsiniz.", orderTypeLabel(orderType)].join("\n"),
+      url: `/customer/orders/${orderType.toLowerCase()}/${order.id}`,
+      tag: `order-status:cancelled-by-driver:${order.id}`,
+    });
+  },
+
+  async sendOrderCompleted(userIds: string[], orderType: OrderType, order: Record<string, unknown>) {
+    await sendToUsers(userIds, {
+      type: "ORDER_COMPLETED",
+      title: "Sifariş tamamlandı",
+      body: ["Sifarişiniz uğurla tamamlandı.", orderTypeLabel(orderType)].join("\n"),
+      url: `/customer/orders/${orderType.toLowerCase()}/${order.id}`,
+      tag: `order-status:completed:${order.id}`,
     });
   },
 };

@@ -160,6 +160,12 @@ export const ordersService = {
       "Sifarişinizi yeni sürücü qəbul etdi.",
       "DRIVER_ACCEPTED"
     );
+    try {
+      await pushService.sendDriverAccepted([order.customer_id], orderType as "BAKU" | "LOCAL" | "CARGO", order);
+    } catch (error) {
+      // Push delivery is supplemental; order flow must continue if it fails.
+      console.error("Driver-accepted push notification failed:", error);
+    }
   },
 
   async driverReject(userId: string, orderType: string, orderId: string) {
@@ -268,6 +274,12 @@ export const ordersService = {
       "Təsdiq üçün 2 dəqiqə vaxtınız var.",
       "CUSTOMER_SELECTED"
     );
+    try {
+      await pushService.sendCustomerSelected([driverUserId], orderType as "BAKU" | "LOCAL" | "CARGO", order);
+    } catch (error) {
+      // Push delivery is supplemental; order flow must continue if it fails.
+      console.error("Customer-selected push notification failed:", error);
+    }
 
     return ordersRepository.getOrderById(orderType, orderId);
   },
@@ -285,6 +297,12 @@ export const ordersService = {
     if (driverId) {
       const driverUserId = await ordersRepository.getDriverUserId(driverId);
       await notificationsService.create(driverUserId, "Sifariş ləğv edildi", "Müştəri sifarişi ləğv etdi.", "ORDER_CANCELLED");
+      try {
+        await pushService.sendOrderCancelledByCustomer([driverUserId], orderType as "BAKU" | "LOCAL" | "CARGO", order);
+      } catch (error) {
+        // Push delivery is supplemental; order flow must continue if it fails.
+        console.error("Order-cancelled-by-customer push notification failed:", error);
+      }
     }
   },
 
@@ -378,6 +396,12 @@ export const ordersService = {
       "Sürücü sifarişdən imtina etdi. Başqa sürücü seçə bilərsiniz.",
       "DRIVER_CANCELLED"
     );
+    try {
+      await pushService.sendOrderCancelledByDriver([order.customer_id], orderType as "BAKU" | "LOCAL" | "CARGO", order);
+    } catch (error) {
+      // Push delivery is supplemental; order flow must continue if it fails.
+      console.error("Order-cancelled-by-driver push notification failed:", error);
+    }
   },
 
   async driverComplete(userId: string, orderType: string, orderId: string) {
@@ -394,6 +418,12 @@ export const ordersService = {
       "Sifarişiniz uğurla tamamlandı.",
       "ORDER_COMPLETED"
     );
+    try {
+      await pushService.sendOrderCompleted([order.customer_id], orderType as "BAKU" | "LOCAL" | "CARGO", order);
+    } catch (error) {
+      // Push delivery is supplemental; order flow must continue if it fails.
+      console.error("Order-completed push notification failed:", error);
+    }
   },
 
   async getDriverActiveOrders(userId: string) {
