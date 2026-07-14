@@ -6,7 +6,8 @@ import { notificationSound, type SoundEvent } from "@/utils/notification-sound";
 const FOREGROUND_POLL_INTERVAL_MS = 5_000;
 const BACKGROUND_POLL_INTERVAL_MS = 30_000;
 const STATE_EVENT = "kt-notifications-state-change";
-export const NOTIFICATION_ARRIVED_EVENT = "notification-arrived";
+/** Fired once per newly-seen notification so a top-of-screen toast can render it live. */
+export const NOTIFICATION_ARRIVED_EVENT = "kt-notification-arrived";
 
 export type NotificationItem = { id: string; type: string; is_read: boolean; created_at: string; title: string; message: string };
 type NotificationState = { items: NotificationItem[]; unreadCount: number; loading: boolean };
@@ -17,6 +18,10 @@ let sharedRefresh: () => Promise<void> = async () => undefined;
 function publish(state: NotificationState) {
   sharedState = state;
   window.dispatchEvent(new Event(STATE_EVENT));
+}
+
+function announceArrival(item: NotificationItem) {
+  window.dispatchEvent(new CustomEvent<NotificationItem>(NOTIFICATION_ARRIVED_EVENT, { detail: item }));
 }
 
 /** Shared client snapshot populated exclusively by SoundNotificationProvider. */
@@ -87,6 +92,7 @@ export function SoundNotificationProvider() {
             // this provider's initial request.
             if (new Date(item.created_at).getTime() >= startedAt) {
               void notificationSound.play(eventForNotification(item.type), `notification:${item.id}`);
+              announceArrival(item);
             }
           });
           initialized.current = true;
@@ -97,6 +103,7 @@ export function SoundNotificationProvider() {
           if (knownIds.current.has(item.id)) continue;
           knownIds.current.add(item.id);
           void notificationSound.play(eventForNotification(item.type), `notification:${item.id}`);
+          announceArrival(item);
         }
       } catch {
         // Existing visual notifications remain available if a poll fails.

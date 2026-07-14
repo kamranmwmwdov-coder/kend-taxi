@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SoundNotificationProvider } from "@/components/SoundNotificationProvider";
+import { NotificationToast } from "@/components/NotificationToast";
 import { PwaServiceWorker } from "@/components/PwaServiceWorker";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OfflineBanner />
         <PwaServiceWorker />
         <SoundNotificationProvider />
+        <NotificationToast />
         {children}
       </body>
     </html>

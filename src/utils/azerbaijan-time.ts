@@ -32,3 +32,28 @@ export function formatAzerbaijanDateTime(value: string) {
     minute: "2-digit",
   }).format(new Date(value));
 }
+
+const WEEKDAY_LABEL_AZ: Record<number, string> = {
+  0: "Bazar",
+  1: "Bazar ertəsi",
+  2: "Çərşənbə axşamı",
+  3: "Çərşənbə",
+  4: "Cümə axşamı",
+  5: "Cümə",
+  6: "Şənbə",
+};
+
+/**
+ * Formats a plain "date" column (e.g. Postgres `date`, no time/timezone component,
+ * such as baku_trip_orders.trip_date) as "Həftə günü, GG.AA.YYYY". Parses the
+ * YYYY-MM-DD string directly as UTC to avoid off-by-one-day shifts from the
+ * viewer's local timezone.
+ */
+export function formatTripDateWithWeekday(dateOnly: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateOnly ?? "");
+  if (!match) return dateOnly;
+  const [, year, month, day] = match;
+  const utcDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  const weekday = WEEKDAY_LABEL_AZ[utcDate.getUTCDay()];
+  return `${weekday}, ${day}.${month}.${year}`;
+}

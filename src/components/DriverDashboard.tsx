@@ -10,6 +10,9 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { notificationSound } from "@/utils/notification-sound";
 import { PushPermissionButton } from "@/components/PushPermissionButton";
 import { normalizePhone } from "@/utils/phone";
+import { formatTripDateWithWeekday } from "@/utils/azerbaijan-time";
+
+const TRIP_TIME_LABEL: Record<string, string> = { MORNING: "Səhər", NOON: "Günorta", EVENING: "Axşam" };
 
 const SERVICE_LABELS: Record<string, string> = {
   BAKU_MORNING: "Bakı Səhər",
@@ -42,9 +45,16 @@ function PhoneActions({ phone }: { phone: string }) {
 
 function PassengerDetails({ order, active = false }: { order: any; active?: boolean }) {
   const isLocal = order.orderType === "LOCAL";
+  const isBaku = order.orderType === "BAKU";
   return (
     <>
       <p className="font-semibold text-sm mb-1">{order.customerName || "Müştəri"}</p>
+      {isBaku && order.trip_date && (
+        <p className="text-sm text-ink-muted mb-1">
+          {formatTripDateWithWeekday(order.trip_date)}
+          {order.trip_time && TRIP_TIME_LABEL[order.trip_time] ? ` · ${TRIP_TIME_LABEL[order.trip_time]}` : ""}
+        </p>
+      )}
       <p className="text-sm mb-1">{order.pickup_location} → {order.dropoff_location}</p>
       <p className="text-sm text-ink-muted mb-1">{order.passenger_count ?? 1} sərnişin</p>
       {isLocal && (
