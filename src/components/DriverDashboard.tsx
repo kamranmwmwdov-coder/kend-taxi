@@ -234,38 +234,51 @@ export function DriverDashboard({ firstName }: { firstName: string }) {
         )}
 
         <div className="flex flex-col gap-3">
-          {orders.map((o) => (
-            <div key={`${o.orderType}-${o.id}`} className="bg-white rounded-2xl p-4 border border-gray-100">
-              <p className="text-xs font-semibold text-primary mb-1">{ORDER_TYPE_LABEL[o.orderType]}</p>
+          {orders.map((o, index) => {
+            const isNewBakuDateGroup =
+              o.orderType === "BAKU" &&
+              (index === 0 || orders[index - 1].orderType !== "BAKU" || orders[index - 1].trip_date !== o.trip_date);
 
-              {(o.orderType === "BAKU" || o.orderType === "LOCAL") && <PassengerDetails order={o} />}
-              {o.orderType === "CARGO" && (
-                <>
-                  <p className="text-sm mb-1">Yük: {o.cargo_info || "Məlumat verilməyib"}</p>
-                  <p className="text-sm mb-1">Götürülmə: {o.sender_address}</p>
-                  <p className="text-sm text-ink-muted mb-1">{o.sender_name} · {o.sender_phone}</p>
-                  <p className="text-sm mb-1">Çatdırılma: {o.receiver_address}</p>
-                  <p className="text-sm text-ink-muted mb-2">{o.receiver_name} · {o.receiver_phone}</p>
-                  <p className="font-bold text-ink mb-3">{o.price} AZN</p>
-                </>
-              )}
+            return (
+              <div key={`${o.orderType}-${o.id}`}>
+                {isNewBakuDateGroup && (
+                  <div className="mb-3 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                    {formatTripDateWithWeekday(o.trip_date)}
+                  </div>
+                )}
+                <div className="bg-white rounded-2xl p-4 border border-gray-100">
+                  <p className="text-xs font-semibold text-primary mb-1">{ORDER_TYPE_LABEL[o.orderType]}</p>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => respond(o.orderType, o.id, "accept")}
-                  className="flex-1 min-h-[44px] rounded-xl bg-success text-white font-semibold text-sm"
-                >
-                  Qəbul Et
-                </button>
-                <button
-                  onClick={() => respond(o.orderType, o.id, "reject")}
-                  className="flex-1 min-h-[44px] rounded-xl bg-white border border-gray-200 text-ink font-semibold text-sm"
-                >
-                  İmtina Et
-                </button>
+                  {(o.orderType === "BAKU" || o.orderType === "LOCAL") && <PassengerDetails order={o} />}
+                  {o.orderType === "CARGO" && (
+                    <>
+                      <p className="text-sm mb-1">Yük: {o.cargo_info || "Məlumat verilməyib"}</p>
+                      <p className="text-sm mb-1">Götürülmə: {o.sender_address}</p>
+                      <p className="text-sm text-ink-muted mb-1">{o.sender_name} · {o.sender_phone}</p>
+                      <p className="text-sm mb-1">Çatdırılma: {o.receiver_address}</p>
+                      <p className="text-sm text-ink-muted mb-2">{o.receiver_name} · {o.receiver_phone}</p>
+                      <p className="font-bold text-ink mb-3">{o.price} AZN</p>
+                    </>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => respond(o.orderType, o.id, "accept")}
+                      className="flex-1 min-h-[44px] rounded-xl bg-success text-white font-semibold text-sm"
+                    >
+                      Qəbul Et
+                    </button>
+                    <button
+                      onClick={() => respond(o.orderType, o.id, "reject")}
+                      className="flex-1 min-h-[44px] rounded-xl bg-white border border-gray-200 text-ink font-semibold text-sm"
+                    >
+                      İmtina Et
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
