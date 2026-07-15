@@ -8,13 +8,15 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { AdBanner } from "@/components/AdBanner";
 import { PushPermissionButton } from "@/components/PushPermissionButton";
 import { AnimatedNavCard } from "@/components/AnimatedNavCard";
-import { Bus, Package, Car, History, User } from "lucide-react";
+import { History, User } from "lucide-react";
 
+// icon dəyəri artıq komponent referansı deyil, sadə string key-dir —
+// server-dən client-ə serializasiya oluna bilən data kimi rahat ötürülür.
 const CARDS = [
-  { href: "/customer/baku-trip", icon: Bus, label: "Bakı Reysi", color: "bg-primary", image: "/images/baku-flame-towers.jpg" },
-  { href: "/customer/cargo", icon: Package, label: "El Yükü", color: "bg-warning", image: "/images/cargo.jpg" },
-  { href: "/customer/local-trip", icon: Car, label: "Rayon Daxili", color: "bg-success", image: "/images/local-trip.jpg" },
-];
+  { href: "/customer/baku-trip", icon: "bus", label: "Bakı Reysi", color: "bg-primary", image: "/images/baku-flame-towers.jpg" },
+  { href: "/customer/cargo", icon: "package", label: "El Yükü", color: "bg-warning", image: "/images/cargo.jpg" },
+  { href: "/customer/local-trip", icon: "car", label: "Rayon Daxili", color: "bg-success", image: "/images/local-trip.jpg" },
+] as const;
 
 export default async function CustomerHomePage() {
   const session = await getSession();

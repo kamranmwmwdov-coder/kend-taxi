@@ -2,19 +2,28 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import { Bus, Package, Car, type LucideIcon } from "lucide-react";
 
 const TRANSITION_MS = 1100;
 
+// Server komponentdən (page.tsx) yalnız serializasiya oluna bilən data (string) ötürülür.
+// Faktiki icon komponenti bu map vasitəsilə burada, client tərəfdə həll olunur.
+const ICONS: Record<string, LucideIcon> = {
+  bus: Bus,
+  package: Package,
+  car: Car,
+};
+
 interface AnimatedNavCardProps {
   href: string;
-  icon: LucideIcon;
+  icon: keyof typeof ICONS;
   label: string;
   color: string;
   image: string;
 }
 
-export function AnimatedNavCard({ href, icon: Icon, label, color, image }: AnimatedNavCardProps) {
+export function AnimatedNavCard({ href, icon, label, color, image }: AnimatedNavCardProps) {
+  const Icon = ICONS[icon];
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const navigateTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
