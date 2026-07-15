@@ -46,6 +46,10 @@ export default function CustomerLoginPage() {
         <PhoneInput value={phone} onChange={setPhone} />
         <Input label="Şifrə" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
+        <Link href="/forgot-password" className="text-primary text-sm font-semibold -mt-2 self-end">
+          Şifrəni unutmusunuz?
+        </Link>
+
         {error && <p className="text-danger text-sm">{error}</p>}
 
         <Button type="submit" loading={loading} disabled={phone.length < 9 || password.length < 1}>

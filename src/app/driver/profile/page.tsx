@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { AddEmailForm } from "@/components/AddEmailForm";
 
 export default function DriverProfilePage() {
   const [data, setData] = useState<any>(null);
@@ -60,8 +61,11 @@ export default function DriverProfilePage() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-3">
         <ChangePasswordForm />
+      </div>
+      <div className="mb-6">
+        <AddEmailForm />
       </div>
 
       <LogoutButton />

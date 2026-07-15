@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getSession } from "@/utils/session";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { AddEmailForm } from "@/components/AddEmailForm";
 
 export default async function CustomerProfilePage() {
   const session = await getSession();
@@ -20,8 +21,11 @@ export default async function CustomerProfilePage() {
         <Row label="Telefon" value={session.phone} />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-3">
         <ChangePasswordForm />
+      </div>
+      <div className="mb-6">
+        <AddEmailForm />
       </div>
 
       <p className="text-xs text-ink-muted mb-6">
