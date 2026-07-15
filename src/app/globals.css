@@ -24,3 +24,24 @@ html, body {
   from { width: 100%; }
   to { width: 0%; }
 }
+
+/* Kart klikləndikdə görünən "yol" keçid animasiyası (Hissə: naviqasiya keçidi) */
+@keyframes kt-route-drive {
+  0% { transform: translateX(-60%); }
+  100% { transform: translateX(160%); }
+}
+
+@keyframes kt-route-road {
+  from { background-position: 0 0; }
+  to { background-position: -64px 0; }
+}
+
+@keyframes kt-route-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kt-route-label-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

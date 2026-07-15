@@ -7,6 +7,7 @@ import { SoundToggle } from "@/components/SoundToggle";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { AdBanner } from "@/components/AdBanner";
 import { PushPermissionButton } from "@/components/PushPermissionButton";
+import { AnimatedNavCard } from "@/components/AnimatedNavCard";
 import { Bus, Package, Car, History, User } from "lucide-react";
 
 const CARDS = [
@@ -39,20 +40,9 @@ export default async function CustomerHomePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-6">
-        {CARDS.map(({ href, icon: Icon, label, color, image }) => (
-            <Link
-              key={href}
-              href={href}
-              className="relative flex items-center gap-4 overflow-hidden rounded-2xl p-5 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform bg-cover bg-center text-white"
-              style={{ backgroundImage: `url(${image})` }}
-            >
-              <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
-              <div className={`relative z-10 w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white`}>
-                <Icon size={22} />
-              </div>
-              <span className="relative z-10 font-semibold text-white">{label}</span>
-            </Link>
-          ))}
+        {CARDS.map(({ href, icon, label, color, image }) => (
+          <AnimatedNavCard key={href} href={href} icon={icon} label={label} color={color} image={image} />
+        ))}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-8">
