@@ -17,6 +17,7 @@ function urlBase64ToUint8Array(value: string) {
 
 export function PushPermissionButton() {
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("default");
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -30,11 +31,15 @@ export function PushPermissionButton() {
     if (Notification.permission !== "granted") return;
 
     void (async () => {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (!registration) return;
-
+      // serviceWorker.ready waits for activation instead of possibly missing a not-yet-registered worker.
+      const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      if (subscription) await saveSubscription(subscription);
+      if (subscription) {
+        await saveSubscription(subscription);
+        setIsSubscribed(true);
+      } else {
+        setIsSubscribed(false);
+      }
     })().catch(() => {
       // Keep the permission control usable if an existing subscription cannot be synchronized.
     });
@@ -77,6 +82,7 @@ export function PushPermissionButton() {
         });
       }
       await saveSubscription(subscription);
+      setIsSubscribed(true);
       setMessage("Phone notifications are enabled.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Phone notifications could not be enabled.");
@@ -100,6 +106,7 @@ export function PushPermissionButton() {
         if (!response.ok) throw new Error("Subscription could not be removed.");
         await subscription.unsubscribe();
       }
+      setIsSubscribed(false);
       setMessage("Phone notifications are disabled.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Subscription could not be removed.");
@@ -119,11 +126,11 @@ export function PushPermissionButton() {
       ) : (
         <button
           type="button"
-          onClick={permission === "granted" ? disable : enable}
+          onClick={isSubscribed ? disable : enable}
           disabled={busy}
           className="min-h-[36px] rounded-lg bg-primary px-3 text-sm font-semibold text-white disabled:opacity-60"
         >
-          {busy ? "Gözləyin..." : permission === "granted" ? "Deaktiv et" : "Aktiv et"}
+          {busy ? "Gözləyin..." : isSubscribed ? "Deaktiv et" : "Aktiv et"}
         </button>
       )}
       {message && <p className="mt-2 text-xs text-ink-muted">{message}</p>}
