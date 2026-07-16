@@ -31,15 +31,17 @@ export const passwordResetRepository = {
 
   async findValidToken(tokenHash: string) {
     const supabase = getSupabaseAdmin();
+    // "users(email)" ilə token-in aid olduğu istifadəçinin email-i də bir sorğuda gətirilir —
+    // confirmReset zamanı requestReset-də istifadə olunan eyni rate-limit key-ni (`reset:${email}`) qurmaq üçün lazımdır.
     const { data, error } = await supabase
       .from("password_reset_tokens")
-      .select("*")
+      .select("*, users(email)")
       .eq("token_hash", tokenHash)
       .is("used_at", null)
       .gt("expires_at", new Date().toISOString())
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return data as (typeof data & { users: { email: string | null } | null }) | null;
   },
 
   async markTokenUsed(id: string) {

@@ -49,6 +49,10 @@ export default function ForgotPasswordPage() {
           <p className="text-sm text-ink-muted">
             Əgər bu email qeydiyyatdadırsa, bərpa linki poçt qutunuza göndərildi. Linkin ömrü 30 dəqiqədir.
           </p>
+          <p className="text-xs text-ink-muted">
+            Email gəlmədi? Profilinizə hələ email əlavə etməmiş ola bilərsiniz — daxil olduqdan sonra
+            profil səhifəsindən əlavə edib bir daha cəhd edin.
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

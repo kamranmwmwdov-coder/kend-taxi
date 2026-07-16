@@ -59,7 +59,14 @@ export const passwordResetService = {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await passwordResetRepository.updatePassword(record.user_id, passwordHash);
     await passwordResetRepository.markTokenUsed(record.id);
-    await loginAttemptsService.reset(`reset:${record.user_id}`);
+
+    // requestReset zamanı `reset:${email}` key-i ilə sayılır, ona görə təmizləmə də
+    // eyni key ilə edilməlidir (əvvəllər `reset:${record.user_id}` istifadə olunurdu ki,
+    // bu heç vaxt üst-üstə düşmürdü və əsl rate-limit qeydi silinmirdi).
+    const userEmail = record.users?.email;
+    if (userEmail) {
+      await loginAttemptsService.reset(`reset:${userEmail}`);
+    }
 
     await logAudit({ userId: record.user_id, action: "PASSWORD_RESET_CONFIRM", module: "auth" });
   },

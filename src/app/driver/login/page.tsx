@@ -66,6 +66,10 @@ export default function DriverLoginPage() {
         <Link href="/forgot-password" className="text-primary text-sm font-semibold -mt-2 self-end">
           Şifrəni unutmusunuz?
         </Link>
+        <p className="text-xs text-ink-muted -mt-2 self-end text-right">
+          Şifrə bərpası üçün profilinizdə email olmalıdır.{" "}
+          <Link href="/driver/profile" className="text-primary font-semibold">Profildən əlavə edin</Link>
+        </p>
 
         {error && <p className="text-danger text-sm">{error}</p>}
 
