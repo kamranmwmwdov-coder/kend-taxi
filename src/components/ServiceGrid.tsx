@@ -13,23 +13,23 @@ interface ServiceItem {
 }
 
 const ROW_1: ServiceItem[] = [
-  { label: "Bakı Reysi", image: "/illustrations/van-black.png", cardBg: "bg-amber-50", iconBg: "bg-amber-400", href: "/customer/baku-trip" },
-  { label: "El yükü", image: "/illustrations/box-cargo.png", cardBg: "bg-violet-50", iconBg: "bg-violet-400", href: "/customer/cargo" },
-  { label: "Rayondaxili taksi", image: "/illustrations/taxi-local.png", cardBg: "bg-sky-50", iconBg: "bg-sky-400", href: "/customer/local-trip" },
-  { label: "İş elanları", image: "/illustrations/bag-briefcase.png", cardBg: "bg-emerald-50", iconBg: "bg-emerald-400" },
+  { label: "Bakı Reysi", image: "/illustrations/van-black.png", cardBg: "bg-primary/[0.08]", iconBg: "bg-primary", href: "/customer/baku-trip" },
+  { label: "El yükü", image: "/illustrations/box-cargo.png", cardBg: "bg-primary/[0.14]", iconBg: "bg-primary-dark", href: "/customer/cargo" },
+  { label: "Rayondaxili taksi", image: "/illustrations/taxi-local.png", cardBg: "bg-primary/[0.20]", iconBg: "bg-primary-light", href: "/customer/local-trip" },
+  { label: "İş elanları", image: "/illustrations/bag-briefcase.png", cardBg: "bg-primary/[0.26]", iconBg: "bg-primary" },
 ];
 
 const ROW_2: ServiceItem[] = [
-  { label: "Kirayə evlər", image: "/illustrations/house-rent.png", cardBg: "bg-green-50", iconBg: "bg-green-500" },
-  { label: "Market", image: "/illustrations/basket-market-new.png", cardBg: "bg-lime-50", iconBg: "bg-lime-500" },
-  { label: "Yemək sifarişi", image: "/illustrations/food-kebab.png", cardBg: "bg-orange-50", iconBg: "bg-orange-400" },
-  { label: "Digər xidmətlər", image: "/icons/grid-dots.svg", imageClassName: "h-7 w-7 opacity-80", cardBg: "bg-gray-100", iconBg: "bg-gray-400" },
+  { label: "Kirayə evlər", image: "/illustrations/house-rent.png", cardBg: "bg-success/10", iconBg: "bg-success" },
+  { label: "Market", image: "/illustrations/basket-market-new.png", cardBg: "bg-success/[0.18]", iconBg: "bg-success-dark" },
+  { label: "Yemək sifarişi", image: "/illustrations/food-kebab.png", cardBg: "bg-warning/[0.14]", iconBg: "bg-warning" },
+  { label: "Digər xidmətlər", image: "/icons/grid-dots.svg", imageClassName: "h-3.5 w-3.5 opacity-80", cardBg: "bg-ink/[0.06]", iconBg: "bg-ink-muted" },
 ];
 
 function ServiceCard({ item }: { item: ServiceItem }) {
   const content = (
     <div
-      className={`relative flex h-full min-h-[112px] flex-col rounded-2xl p-2.5 ${item.cardBg} ${
+      className={`relative flex h-full min-h-[160px] flex-col rounded-2xl p-2.5 ${item.cardBg} ${
         !item.href ? "opacity-90" : ""
       }`}
     >
@@ -44,7 +44,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
         <img
           src={item.image}
           alt=""
-          className={item.imageClassName ?? "h-12 w-12 object-contain drop-shadow-sm"}
+          className={item.imageClassName ?? "h-[72px] w-[72px] object-contain drop-shadow-sm"}
         />
       </div>
       <div className="flex justify-end">
