@@ -1,66 +1,85 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/utils/session";
-import { LogoutButton } from "@/components/LogoutButton";
 import { NotificationBell } from "@/components/NotificationBell";
 import { SoundToggle } from "@/components/SoundToggle";
+import { LogoutIconButton } from "@/components/LogoutIconButton";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { AdBanner } from "@/components/AdBanner";
 import { PushPermissionButton } from "@/components/PushPermissionButton";
-import { AnimatedNavCard } from "@/components/AnimatedNavCard";
-import { History, User } from "lucide-react";
-
-// icon dəyəri artıq komponent referansı deyil, sadə string key-dir —
-// server-dən client-ə serializasiya oluna bilən data kimi rahat ötürülür.
-const CARDS = [
-  { href: "/customer/baku-trip", icon: "bus", label: "Bakı Reysi", color: "bg-primary", image: "/images/baku-flame-towers.jpg" },
-  { href: "/customer/cargo", icon: "package", label: "El Yükü", color: "bg-warning", image: "/images/cargo.jpg" },
-  { href: "/customer/local-trip", icon: "car", label: "Rayon Daxili", color: "bg-success", image: "/images/local-trip.jpg" },
-] as const;
+import { ServiceGrid } from "@/components/ServiceGrid";
+import { QuickLinksRow } from "@/components/QuickLinksRow";
+import { RecentOrdersPreview } from "@/components/RecentOrdersPreview";
+import { Gift, ChevronRight } from "lucide-react";
 
 export default async function CustomerHomePage() {
   const session = await getSession();
   if (!session || session.role !== "CUSTOMER") redirect("/customer/login");
 
+  const initial = session.firstName?.trim()?.charAt(0)?.toUpperCase() || "?";
+
   return (
-    <main className="min-h-screen p-6 max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-ink-muted text-sm">Xoş gəldiniz,</p>
-          <h1 className="text-xl font-bold">{session.firstName}</h1>
+    <main className="min-h-screen px-4 pt-6 max-w-sm mx-auto">
+      {/* Header */}
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/15 text-lg font-bold text-primary">
+            {initial}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-ink-muted">Xoş gəlmisiniz,</p>
+            <h1 className="truncate text-xl font-bold">{session.firstName} 👋</h1>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <SoundToggle />
-          <NotificationBell href="/customer/notifications" />
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-100 bg-white">
+            <NotificationBell href="/customer/notifications" />
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-100 bg-white">
+            <SoundToggle />
+          </div>
+          <LogoutIconButton />
         </div>
       </div>
 
-      <AnnouncementBanner />
       <PushPermissionButton />
-      <div className="mb-6 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+
+      <div className="mb-4 overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
         <AdBanner targetRole="CUSTOMER" />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 mb-6">
-        {CARDS.map(({ href, icon, label, color, image }) => (
-          <AnimatedNavCard key={href} href={href} icon={icon} label={label} color={color} image={image} />
-        ))}
+      <AnnouncementBanner />
+
+      <ServiceGrid />
+
+      <QuickLinksRow />
+
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-bold">Sifariş tarixçəsi</h2>
+          <Link href="/customer/orders" className="flex items-center gap-0.5 text-sm font-semibold text-primary">
+            Hamısına bax <ChevronRight size={16} />
+          </Link>
+        </div>
+        <RecentOrdersPreview />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        <Link href="/customer/orders" className="relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl p-4 border border-gray-100 bg-cover bg-center text-white" style={{ backgroundImage: "url(/images/orders.jpg)" }}>
-          <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
-          <History size={20} className="relative z-10" />
-          <span className="relative z-10 text-sm font-medium">Sifariş Tarixçəm</span>
-        </Link>
-        <Link href="/customer/profile" className="relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl p-4 border border-gray-100 bg-cover bg-center text-white" style={{ backgroundImage: "url(/images/profile.jpg)" }}>
-          <span className="absolute inset-0 bg-black/50" aria-hidden="true" />
-          <User size={20} className="relative z-10" />
-          <span className="relative z-10 text-sm font-medium">Profilim</span>
-        </Link>
+      <div className="mb-8 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-4 text-white">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15">
+          <Gift size={22} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold">Dostlarını dəvət et, bonus qazan!</p>
+          <p className="text-xs text-white/80">Hər uğurlu dəvət üçün bonus əldə et</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => alert("Dəvət proqramı tezliklə əlçatan olacaq.")}
+          className="shrink-0 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-primary"
+        >
+          Dəvət et
+        </button>
       </div>
-
-      <LogoutButton />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Bell } from "lucide-react";
 
 type PushSubscriptionJson = {
   endpoint: string;
@@ -115,25 +116,31 @@ export function PushPermissionButton() {
     }
   }
 
-  if (permission === "unsupported") return null;
+  if (permission === "unsupported" || isSubscribed) return null;
 
   return (
-    <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3">
-      <p className="mb-2 text-sm font-medium">Telefon bildirişləri</p>
-      <p className="mb-3 text-xs text-ink-muted">Vacib yenilikləri telefonunuzun ekranında görün.</p>
-      {permission === "denied" ? (
-        <p className="text-xs text-danger">Brauzer ayarlarından bildiriş icazəsini aktiv edin.</p>
-      ) : (
+    <div className="mb-4 flex items-center gap-3 rounded-2xl bg-primary/10 p-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+        <Bell size={18} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-primary">Bildirişləri aktiv et</p>
+        <p className="text-xs text-ink-muted">Endirimlər, yeniliklər və vacib məlumatları qaçırma!</p>
+        {permission === "denied" && (
+          <p className="mt-1 text-xs text-danger">Brauzer ayarlarından bildiriş icazəsini aktiv edin.</p>
+        )}
+        {message && <p className="mt-1 text-xs text-ink-muted">{message}</p>}
+      </div>
+      {permission !== "denied" && (
         <button
           type="button"
-          onClick={isSubscribed ? disable : enable}
+          onClick={enable}
           disabled={busy}
-          className="min-h-[36px] rounded-lg bg-primary px-3 text-sm font-semibold text-white disabled:opacity-60"
+          className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
-          {busy ? "Gözləyin..." : isSubscribed ? "Deaktiv et" : "Aktiv et"}
+          {busy ? "Gözləyin..." : "Aktiv et"}
         </button>
       )}
-      {message && <p className="mt-2 text-xs text-ink-muted">{message}</p>}
     </div>
   );
 }

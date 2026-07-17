@@ -8,9 +8,9 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#1D6FE0",
-          light: "#4A90F0",
-          dark: "#1352A8",
+          DEFAULT: "#5B4FE5",
+          light: "#8B7FF2",
+          dark: "#4338B0",
         },
         success: { DEFAULT: "#1E9E5A", dark: "#166F40" },
         warning: { DEFAULT: "#E08A1D" },
