@@ -29,7 +29,7 @@ const ROW_2: ServiceItem[] = [
 function ServiceCard({ item }: { item: ServiceItem }) {
   const content = (
     <div
-      className={`relative flex h-full min-h-[112px] flex-col rounded-2xl p-2.5 ${item.cardBg} ${
+      className={`relative flex h-full min-h-[84px] flex-col rounded-2xl p-2.5 ${item.cardBg} ${
         !item.href ? "opacity-90" : ""
       }`}
     >
