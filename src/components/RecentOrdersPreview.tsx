@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bus, Package, Car } from "lucide-react";
 import { StatusBadge, ORDER_TYPE_LABEL } from "@/components/StatusBadge";
 
-const TYPE_ICON = { BAKU: Bus, CARGO: Package, LOCAL: Car } as const;
+const TYPE_IMAGE = {
+  BAKU: "/illustrations/van-black.png",
+  CARGO: "/illustrations/box-cargo.png",
+  LOCAL: "/illustrations/taxi-local.png",
+} as const;
 
 function routeLabel(order: any) {
   if (order.orderType === "CARGO") return `${order.sender_address} → ${order.receiver_address}`;
@@ -39,11 +42,12 @@ export function RecentOrdersPreview() {
   return (
     <div className="flex flex-col divide-y divide-gray-50">
       {orders.map((o) => {
-        const Icon = TYPE_ICON[o.orderType as keyof typeof TYPE_ICON] ?? Bus;
+        const image = TYPE_IMAGE[o.orderType as keyof typeof TYPE_IMAGE] ?? TYPE_IMAGE.BAKU;
         return (
           <div key={`${o.orderType}-${o.id}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-ink-muted">
-              <Icon size={18} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt="" className="h-7 w-7 object-contain" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">{ORDER_TYPE_LABEL[o.orderType]}</p>
