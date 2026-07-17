@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Megaphone, ChevronRight } from "lucide-react";
+import { Megaphone } from "lucide-react";
+import { MaskIcon } from "@/components/MaskIcon";
 
 interface Announcement {
   id: string;
@@ -41,7 +42,7 @@ export function AnnouncementBanner() {
             <p className="text-sm font-semibold leading-snug text-ink">{a.title}</p>
             <p className="text-sm text-ink-muted">{a.content}</p>
           </div>
-          <ChevronRight size={18} className="mt-1 shrink-0 text-danger" />
+          <MaskIcon src="/icons/chevron-right.svg" className="mt-1 h-[18px] w-[18px] shrink-0 text-danger" />
         </div>
       ))}
     </div>

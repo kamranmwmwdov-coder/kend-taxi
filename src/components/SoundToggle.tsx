@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { MaskIcon } from "@/components/MaskIcon";
 import { getSoundEnabled, notificationSound, setSoundEnabled, subscribeToSoundPreference } from "@/utils/notification-sound";
 
 export function SoundToggle() {
@@ -27,11 +27,11 @@ export function SoundToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="inline-flex p-2 text-ink"
+      className={`inline-flex p-2 ${enabled ? "text-primary" : "text-ink-muted"}`}
       aria-label={enabled ? "Səsi söndür" : "Səsi aktiv et"}
       title={enabled ? "Səs aktivdir" : "Səs söndürülüb"}
     >
-      {enabled ? <Volume2 size={21} /> : <VolumeX size={21} />}
+      <MaskIcon src="/icons/speaker.svg" className="h-[21px] w-[21px]" />
     </button>
   );
 }

@@ -1,26 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { History, MapPin, Heart, Headphones, Settings, type LucideIcon } from "lucide-react";
+import { MaskIcon } from "@/components/MaskIcon";
 
 interface QuickLink {
   label: string;
-  icon: LucideIcon;
+  icon: string;
   href?: string;
 }
 
 const LINKS: QuickLink[] = [
-  { label: "Sifariş tarixçəsi", icon: History, href: "/customer/orders" },
-  { label: "Seçilən ünvanlarım", icon: MapPin },
-  { label: "Favori xidmətlərim", icon: Heart },
-  { label: "Dəstək və yardım", icon: Headphones },
-  { label: "Parametrlər", icon: Settings, href: "/customer/profile" },
+  { label: "Sifariş tarixçəsi", icon: "/icons/history-clock.svg", href: "/customer/orders" },
+  { label: "Seçilən ünvanlarım", icon: "/icons/location-pin.svg" },
+  { label: "Favori xidmətlərim", icon: "/icons/heart.svg" },
+  { label: "Dəstək və yardım", icon: "/icons/headset.svg" },
+  { label: "Parametrlər", icon: "/icons/gear.svg", href: "/customer/profile" },
 ];
 
-function LinkContent({ icon: Icon, label, soon }: { icon: LucideIcon; label: string; soon?: boolean }) {
+function LinkContent({ icon, label, soon }: { icon: string; label: string; soon?: boolean }) {
   return (
     <div className={`flex flex-col items-center gap-1.5 ${soon ? "opacity-60" : ""}`}>
-      <Icon size={20} className="text-primary" />
+      <MaskIcon src={icon} className="h-5 w-5 text-primary" />
       <span className="text-center text-[11px] font-medium leading-tight text-ink">{label}</span>
     </div>
   );

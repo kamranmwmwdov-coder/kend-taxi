@@ -11,7 +11,7 @@ import { ServiceGrid } from "@/components/ServiceGrid";
 import { QuickLinksRow } from "@/components/QuickLinksRow";
 import { RecentOrdersPreview } from "@/components/RecentOrdersPreview";
 import { SoonButton } from "@/components/SoonButton";
-import { Gift, ChevronRight } from "lucide-react";
+import { MaskIcon } from "@/components/MaskIcon";
 
 export default async function CustomerHomePage() {
   const session = await getSession();
@@ -59,15 +59,16 @@ export default async function CustomerHomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-bold">Sifariş tarixçəsi</h2>
           <Link href="/customer/orders" className="flex items-center gap-0.5 text-sm font-semibold text-primary">
-            Hamısına bax <ChevronRight size={16} />
+            Hamısına bax <MaskIcon src="/icons/chevron-right.svg" className="h-4 w-4 text-primary" />
           </Link>
         </div>
         <RecentOrdersPreview />
       </div>
 
       <div className="mb-8 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-4 text-white">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15">
-          <Gift size={22} />
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/illustrations/gift-box.png" alt="" className="h-full w-full object-contain" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold">Dostlarını dəvət et, bonus qazan!</p>
