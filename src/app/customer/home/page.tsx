@@ -10,6 +10,7 @@ import { PushPermissionButton } from "@/components/PushPermissionButton";
 import { ServiceGrid } from "@/components/ServiceGrid";
 import { QuickLinksRow } from "@/components/QuickLinksRow";
 import { RecentOrdersPreview } from "@/components/RecentOrdersPreview";
+import { SoonButton } from "@/components/SoonButton";
 import { Gift, ChevronRight } from "lucide-react";
 
 export default async function CustomerHomePage() {
@@ -72,13 +73,12 @@ export default async function CustomerHomePage() {
           <p className="text-sm font-bold">Dostlarını dəvət et, bonus qazan!</p>
           <p className="text-xs text-white/80">Hər uğurlu dəvət üçün bonus əldə et</p>
         </div>
-        <button
-          type="button"
-          onClick={() => alert("Dəvət proqramı tezliklə əlçatan olacaq.")}
+        <SoonButton
+          message="Dəvət proqramı tezliklə əlçatan olacaq."
           className="shrink-0 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-primary"
         >
           Dəvət et
-        </button>
+        </SoonButton>
       </div>
     </main>
   );

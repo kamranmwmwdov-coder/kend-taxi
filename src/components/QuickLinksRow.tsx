@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { History, MapPin, Heart, Headphones, Settings, type LucideIcon } from "lucide-react";
 
