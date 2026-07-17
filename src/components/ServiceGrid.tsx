@@ -22,7 +22,7 @@ const ROW_1: ServiceItem[] = [
 const ROW_2: ServiceItem[] = [
   { label: "Kirayə evlər", image: "/illustrations/house-rent.png", cardBg: "bg-success/10", iconBg: "bg-success" },
   { label: "Market", image: "/illustrations/basket-market-new.png", cardBg: "bg-success/[0.18]", iconBg: "bg-success-dark" },
-  { label: "Yemək sifarişi", image: "/illustrations/food-kebab.png", cardBg: "bg-warning/[0.14]", iconBg: "bg-warning" },
+  { label: "Yemək sifarişi", image: "/illustrations/food-burger-fries.png", cardBg: "bg-warning/[0.14]", iconBg: "bg-warning" },
   { label: "Digər xidmətlər", image: "/icons/grid-dots.svg", imageClassName: "h-3.5 w-3.5 opacity-80", cardBg: "bg-ink/[0.06]", iconBg: "bg-ink-muted" },
 ];
 
