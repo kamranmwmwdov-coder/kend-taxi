@@ -29,17 +29,16 @@ const ROW_2: ServiceItem[] = [
 function ServiceCard({ item }: { item: ServiceItem }) {
   const content = (
     <div
-      className={`relative flex h-full min-h-[84px] flex-col rounded-2xl p-2.5 ${item.cardBg} ${
+      className={`relative aspect-square w-full overflow-hidden rounded-2xl ${item.cardBg} ${
         !item.href ? "opacity-90" : ""
       }`}
     >
       {!item.href && (
-        <span className="absolute right-1.5 top-1.5 rounded-full bg-white/80 px-1.5 py-0.5 text-[8px] font-semibold leading-none text-ink-muted">
+        <span className="absolute right-1.5 top-1.5 z-10 rounded-full bg-white/80 px-1.5 py-0.5 text-[8px] font-semibold leading-none text-ink-muted">
           Tezliklə
         </span>
       )}
-      <span className="pr-8 text-[11px] font-bold leading-tight text-ink">{item.label}</span>
-      <div className="flex flex-1 items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.image}
@@ -47,17 +46,18 @@ function ServiceCard({ item }: { item: ServiceItem }) {
           className={item.imageClassName ?? "h-[72px] w-[72px] object-contain drop-shadow-sm"}
         />
       </div>
-      <div className="flex justify-end">
-        <span className={`flex h-5 w-5 items-center justify-center rounded-full ${item.iconBg}`}>
-          <MaskIcon src="/icons/arrow-right.svg" className="h-2.5 w-2.5 text-white" />
-        </span>
-      </div>
+      <span className="absolute left-2 top-2 pr-1 text-[11px] font-bold leading-tight text-ink">
+        {item.label}
+      </span>
+      <span className={`absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full ${item.iconBg}`}>
+        <MaskIcon src="/icons/arrow-right.svg" className="h-2.5 w-2.5 text-white" />
+      </span>
     </div>
   );
 
   if (item.href) {
     return (
-      <Link href={item.href} className="block h-full">
+      <Link href={item.href} className="block w-full">
         {content}
       </Link>
     );
@@ -67,7 +67,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
     <button
       type="button"
       onClick={() => alert(`${item.label} tezliklə əlçatan olacaq.`)}
-      className="block h-full w-full text-left"
+      className="block w-full text-left"
     >
       {content}
     </button>
