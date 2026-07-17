@@ -13,17 +13,16 @@ interface ServiceItem {
 }
 
 const ROW_1: ServiceItem[] = [
-  { label: "Bakı Reysi", image: "/illustrations/taxi-yellow.png", cardBg: "bg-amber-50", iconBg: "bg-amber-400", href: "/customer/baku-trip" },
-  { label: "El yükü", image: "/illustrations/truck-purple.png", cardBg: "bg-violet-50", iconBg: "bg-violet-400", href: "/customer/cargo" },
-  { label: "Rayondaxili taksi", image: "/illustrations/car-blue.png", cardBg: "bg-sky-50", iconBg: "bg-sky-400", href: "/customer/local-trip" },
-  { label: "İş elanları", image: "/illustrations/briefcase-green.png", cardBg: "bg-emerald-50", iconBg: "bg-emerald-400" },
-  { label: "Kirayə evlər", image: "/illustrations/house.png", cardBg: "bg-green-50", iconBg: "bg-green-500" },
+  { label: "Bakı Reysi", image: "/illustrations/van-black.png", cardBg: "bg-amber-50", iconBg: "bg-amber-400", href: "/customer/baku-trip" },
+  { label: "El yükü", image: "/illustrations/box-cargo.png", cardBg: "bg-violet-50", iconBg: "bg-violet-400", href: "/customer/cargo" },
+  { label: "Rayondaxili taksi", image: "/illustrations/taxi-local.png", cardBg: "bg-sky-50", iconBg: "bg-sky-400", href: "/customer/local-trip" },
+  { label: "İş elanları", image: "/illustrations/bag-briefcase.png", cardBg: "bg-emerald-50", iconBg: "bg-emerald-400" },
 ];
 
 const ROW_2: ServiceItem[] = [
-  { label: "Market", image: "/illustrations/basket-market.png", cardBg: "bg-lime-50", iconBg: "bg-lime-500" },
-  { label: "Yemək sifarişi", image: "/illustrations/burger-combo.png", cardBg: "bg-orange-50", iconBg: "bg-orange-400" },
-  { label: "Dükanlar", image: "/illustrations/shop-storefront.png", cardBg: "bg-purple-50", iconBg: "bg-purple-400" },
+  { label: "Kirayə evlər", image: "/illustrations/house-rent.png", cardBg: "bg-green-50", iconBg: "bg-green-500" },
+  { label: "Market", image: "/illustrations/basket-market-new.png", cardBg: "bg-lime-50", iconBg: "bg-lime-500" },
+  { label: "Yemək sifarişi", image: "/illustrations/food-kebab.png", cardBg: "bg-orange-50", iconBg: "bg-orange-400" },
   { label: "Digər xidmətlər", image: "/icons/grid-dots.svg", imageClassName: "h-7 w-7 opacity-80", cardBg: "bg-gray-100", iconBg: "bg-gray-400" },
 ];
 
@@ -78,7 +77,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
 export function ServiceGrid() {
   return (
     <div className="mb-6 flex flex-col gap-2">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {ROW_1.map((item) => (
           <ServiceCard key={item.label} item={item} />
         ))}
