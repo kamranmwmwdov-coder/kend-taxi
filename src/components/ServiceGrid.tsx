@@ -8,7 +8,6 @@ import {
   Home as HomeIcon,
   ShoppingBasket,
   UtensilsCrossed,
-  Store,
   LayoutGrid,
   ArrowRight,
   type LucideIcon,
@@ -27,13 +26,12 @@ const ROW_1: ServiceItem[] = [
   { label: "El yükü", icon: Truck, cardBg: "bg-violet-50", iconBg: "bg-violet-400", href: "/customer/cargo" },
   { label: "Rayondaxili taksi", icon: Car, cardBg: "bg-sky-50", iconBg: "bg-sky-400", href: "/customer/local-trip" },
   { label: "İş elanları", icon: Briefcase, cardBg: "bg-emerald-50", iconBg: "bg-emerald-400" },
-  { label: "Kirayə evlər", icon: HomeIcon, cardBg: "bg-green-50", iconBg: "bg-green-500" },
 ];
 
 const ROW_2: ServiceItem[] = [
+  { label: "Kirayə evlər", icon: HomeIcon, cardBg: "bg-green-50", iconBg: "bg-green-500" },
   { label: "Market", icon: ShoppingBasket, cardBg: "bg-lime-50", iconBg: "bg-lime-500" },
   { label: "Yemək sifarişi", icon: UtensilsCrossed, cardBg: "bg-orange-50", iconBg: "bg-orange-400" },
-  { label: "Dükanlar", icon: Store, cardBg: "bg-purple-50", iconBg: "bg-indigo-400" },
   { label: "Digər xidmətlər", icon: LayoutGrid, cardBg: "bg-gray-100", iconBg: "bg-gray-400" },
 ];
 
@@ -76,7 +74,7 @@ function ServiceCard({ item }: { item: ServiceItem }) {
 export function ServiceGrid() {
   return (
     <div className="mb-6 flex flex-col gap-3">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {ROW_1.map((item) => (
           <ServiceCard key={item.label} item={item} />
         ))}
