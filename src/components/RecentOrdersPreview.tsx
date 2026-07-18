@@ -1,23 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { StatusBadge, ORDER_TYPE_LABEL } from "@/components/StatusBadge";
-
-const TYPE_IMAGE = {
-  BAKU: "/illustrations/van-black.png",
-  CARGO: "/illustrations/box-cargo.png",
-  LOCAL: "/illustrations/taxi-local.png",
-} as const;
-
-function routeLabel(order: any) {
-  if (order.orderType === "CARGO") return `${order.sender_address} → ${order.receiver_address}`;
-  return `${order.pickup_location} → ${order.dropoff_location}`;
-}
-
-function priceLabel(order: any) {
-  const amount = order.orderType === "BAKU" ? order.total_price ?? order.price : order.price;
-  return `${amount} AZN`;
-}
+import { OrderRow } from "@/components/OrderRow";
 
 export function RecentOrdersPreview() {
   const [orders, setOrders] = useState<any[] | null>(null);
@@ -41,28 +25,11 @@ export function RecentOrdersPreview() {
 
   return (
     <div className="flex flex-col divide-y divide-gray-50">
-      {orders.map((o) => {
-        const image = TYPE_IMAGE[o.orderType as keyof typeof TYPE_IMAGE] ?? TYPE_IMAGE.BAKU;
-        return (
-          <div key={`${o.orderType}-${o.id}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt="" className="h-7 w-7 object-contain" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">{ORDER_TYPE_LABEL[o.orderType]}</p>
-              <p className="truncate text-xs text-ink-muted">{routeLabel(o)}</p>
-              <p className="text-xs text-ink-muted">
-                {new Date(o.created_at).toLocaleDateString("az-AZ")}, {new Date(o.created_at).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" })}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-col items-end gap-1">
-              <p className="text-sm font-bold">{priceLabel(o)}</p>
-              <StatusBadge status={o.status} />
-            </div>
-          </div>
-        );
-      })}
+      {orders.map((o) => (
+        <div key={`${o.orderType}-${o.id}`} className="py-3 first:pt-0 last:pb-0">
+          <OrderRow order={o} />
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { StatusBadge, ORDER_TYPE_LABEL } from "@/components/StatusBadge";
+import { MaskIcon } from "@/components/MaskIcon";
+import { OrderRow } from "@/components/OrderRow";
 
 export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -19,7 +19,9 @@ export default function CustomerOrdersPage() {
 
   return (
     <main className="min-h-screen px-6 py-8 max-w-sm mx-auto">
-      <Link href="/customer/home" className="mb-6 inline-block text-ink-muted"><ArrowLeft /></Link>
+      <Link href="/customer/home" className="mb-6 inline-flex text-ink-muted">
+        <MaskIcon src="/icons/arrow-right.svg" className="h-5 w-5 rotate-180 text-ink-muted" />
+      </Link>
       <h1 className="text-xl font-bold mb-6">Sifariş Tarixçəm</h1>
 
       {loading && <p className="text-ink-muted">Yüklənir...</p>}
@@ -35,18 +37,15 @@ export default function CustomerOrdersPage() {
           const CardWrapper = isActive ? Link : "div";
           const wrapperProps = isActive ? { href: `/customer/orders/${typePath}/${o.id}` } : {};
           return (
-            <CardWrapper key={`${o.orderType}-${o.id}`} {...(wrapperProps as any)} className="bg-white rounded-2xl p-4 border border-gray-100 block">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-sm">{ORDER_TYPE_LABEL[o.orderType]}</span>
-                <StatusBadge status={o.status} />
-              </div>
-              <p className="text-ink-muted text-xs mb-1">
-                {new Date(o.created_at).toLocaleDateString("az-AZ")} · {new Date(o.created_at).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" })}
-              </p>
-              <p className="font-bold text-primary">
-                {o.orderType === "BAKU" ? o.total_price ?? o.price : o.price} AZN
-              </p>
-              {isActive && <p className="text-xs text-primary mt-1">Detallara bax →</p>}
+            <CardWrapper
+              key={`${o.orderType}-${o.id}`}
+              {...(wrapperProps as any)}
+              className="block rounded-2xl border border-gray-100 bg-white p-3"
+            >
+              <OrderRow order={o} />
+              {isActive && (
+                <p className="mt-2 pl-[52px] text-xs font-medium text-primary">Detallara bax →</p>
+              )}
             </CardWrapper>
           );
         })}
