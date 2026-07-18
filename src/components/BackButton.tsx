@@ -6,13 +6,7 @@ export function BackButton() {
   const router = useRouter();
 
   function handleClick() {
-    // Səhifə yeni tab-da açılıbsa (məs. qeydiyyat formasından "_blank" ilə),
-    // tarixçədə geri gedəcək yer olmur — belə halda ana səhifəyə yönləndiririk.
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
+    router.back();
   }
 
   return (

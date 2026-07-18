@@ -100,11 +100,11 @@ export default function CustomerRegisterPage() {
           onChange={(e) => setTermsAccepted(e.target.checked)}
           label={
             <>
-              <Link href="/terms" target="_blank" className="text-primary font-medium underline">
+              <Link href="/terms" className="text-primary font-medium underline">
                 İstifadə Şərtləri
               </Link>{" "}
               və{" "}
-              <Link href="/privacy" target="_blank" className="text-primary font-medium underline">
+              <Link href="/privacy" className="text-primary font-medium underline">
                 Məxfilik Siyasəti
               </Link>{" "}
               ilə tanış oldum və qəbul edirəm.
