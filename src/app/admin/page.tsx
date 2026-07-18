@@ -10,6 +10,9 @@ interface Stats {
   driverCount: number;
   activeDriverCount: number;
   todayRevenue: number;
+  pendingJobListingCount: number;
+  activeJobListingCount: number;
+  totalJobListingCount: number;
 }
 
 const CARDS: { key: keyof Stats; label: string; suffix?: string }[] = [
@@ -21,6 +24,9 @@ const CARDS: { key: keyof Stats; label: string; suffix?: string }[] = [
   { key: "activeDriverCount", label: "Aktiv sürücü" },
   { key: "customerCount", label: "Müştəri sayı" },
   { key: "todayRevenue", label: "Bugünkü gəlir", suffix: " AZN" },
+  { key: "pendingJobListingCount", label: "🟡 Gözləyən Elanlar" },
+  { key: "activeJobListingCount", label: "🟢 Aktiv Elanlar" },
+  { key: "totalJobListingCount", label: "📊 Ümumi Elanlar" },
 ];
 
 export default function AdminDashboardPage() {
@@ -42,7 +48,7 @@ export default function AdminDashboardPage() {
 
       {loading && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 11 }).map((_, i) => (
             <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse" />
           ))}
         </div>

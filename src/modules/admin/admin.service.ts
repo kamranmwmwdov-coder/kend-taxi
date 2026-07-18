@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { adminRepository } from "./admin.repository";
 import { isValidAzPhone } from "@/utils/phone";
 import { logAudit } from "@/modules/logs/logs.service";
+import { jobListingsService } from "@/modules/job-listings/job-listings.service";
 
 export class AdminError extends Error {
   constructor(message: string, public status = 400) {
@@ -82,7 +83,11 @@ export const adminService = {
   },
 
   async dashboard() {
-    return adminRepository.dashboardStats();
+    const [stats, jobListingStats] = await Promise.all([
+      adminRepository.dashboardStats(),
+      jobListingsService.dashboardCounts(),
+    ]);
+    return { ...stats, ...jobListingStats };
   },
 
   async getSettings() {

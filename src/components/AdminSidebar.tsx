@@ -1,8 +1,9 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
-import { LayoutDashboard, Users, Car, Megaphone, FileText, Settings, LogOut, ClipboardList, Volume2 } from "lucide-react";
+import { LayoutDashboard, Users, Car, Megaphone, FileText, Settings, LogOut, ClipboardList, Volume2, Briefcase, ChevronDown } from "lucide-react";
 
 const MENU = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -15,9 +16,16 @@ const MENU = [
   { href: "/admin/settings", label: "Parametrlər", icon: Settings },
 ];
 
+const JOB_LISTINGS_SUBMENU = [
+  { href: "/admin/job-listings/pending", label: "Gözləyən Elanlar" },
+  { href: "/admin/job-listings/active", label: "Aktiv Elanlar" },
+];
+
 export function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  const isJobListingsSection = pathname.startsWith("/admin/job-listings");
+  const [jobListingsOpen, setJobListingsOpen] = useState(isJobListingsSection);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -44,6 +52,35 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
             <Icon size={18} /> {label}
           </Link>
         ))}
+
+        <button
+          type="button"
+          onClick={() => setJobListingsOpen((o) => !o)}
+          className={clsx(
+            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+            isJobListingsSection ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/5"
+          )}
+        >
+          <Briefcase size={18} />
+          <span className="flex-1 text-left">💼 İş Elanları</span>
+          <ChevronDown size={16} className={clsx("transition-transform", jobListingsOpen && "rotate-180")} />
+        </button>
+        {jobListingsOpen && (
+          <div className="flex flex-col gap-1 pl-9">
+            {JOB_LISTINGS_SUBMENU.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={clsx(
+                  "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  pathname === href ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/5"
+                )}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
       </nav>
 
       <button
