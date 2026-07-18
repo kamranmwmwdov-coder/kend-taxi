@@ -16,7 +16,7 @@ const ROW_1: ServiceItem[] = [
   { label: "Bakı Reysi", image: "/illustrations/van-black.png", cardBg: "bg-primary/[0.08]", iconBg: "bg-primary", href: "/customer/baku-trip" },
   { label: "El yükü", image: "/illustrations/box-cargo.png", cardBg: "bg-primary/[0.14]", iconBg: "bg-primary-dark", href: "/customer/cargo" },
   { label: "Rayondaxili taksi", image: "/illustrations/taxi-local.png", cardBg: "bg-primary/[0.20]", iconBg: "bg-primary-light", href: "/customer/local-trip" },
-  { label: "İş elanları", image: "/illustrations/bag-briefcase.png", cardBg: "bg-primary/[0.26]", iconBg: "bg-primary" },
+  { label: "İş elanları", image: "/illustrations/bag-briefcase.png", cardBg: "bg-primary/[0.26]", iconBg: "bg-primary", href: "/customer/job-listings" },
 ];
 
 const ROW_2: ServiceItem[] = [
