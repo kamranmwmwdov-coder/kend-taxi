@@ -31,6 +31,7 @@ export const authRepository = {
     firstName: string;
     lastName: string;
     phone: string;
+    email?: string;
     passwordHash: string;
   }) {
     const supabase = getSupabaseAdmin();
@@ -41,6 +42,7 @@ export const authRepository = {
         first_name: input.firstName,
         last_name: input.lastName,
         phone: normalizePhone(input.phone),
+        email: input.email ?? null,
         password_hash: input.passwordHash,
         status: "ACTIVE",
       })

@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import { authRepository } from "./auth.repository";
 import { isValidAzPhone, normalizePhone } from "@/utils/phone";
+import { isValidEmail, normalizeEmail } from "@/utils/reset-token";
+import { passwordResetRepository } from "./password-reset.repository";
 import { createSession, destroySession } from "@/utils/session";
 import { logAudit } from "@/modules/logs/logs.service";
 import { loginAttemptsService } from "./login-attempts.service";
@@ -13,17 +15,26 @@ export class AuthError extends Error {
 }
 
 export const authService = {
-  async register(input: { firstName: string; lastName: string; phone: string; password: string }) {
+  async register(input: { firstName: string; lastName: string; phone: string; email?: string; password: string }) {
     if (input.firstName.trim().length < 2) throw new AuthError("Ad minimum 2 simvol olmalıdır.", 422);
     if (input.lastName.trim().length < 2) throw new AuthError("Soyad minimum 2 simvol olmalıdır.", 422);
     if (!isValidAzPhone(input.phone)) throw new AuthError("Telefon nömrəsi düzgün formatda deyil.", 422);
     if (input.password.length < 6) throw new AuthError("Şifrə minimum 6 simvol olmalıdır.", 422);
 
+    // E-poçt istəyə bağlıdır — daxil edilibsə formatı və unikallığı yoxlanılır
+    let email: string | undefined;
+    if (input.email && input.email.trim().length > 0) {
+      email = normalizeEmail(input.email);
+      if (!isValidEmail(email)) throw new AuthError("Düzgün email daxil edin.", 422);
+      const existingEmail = await passwordResetRepository.findUserByEmail(email);
+      if (existingEmail) throw new AuthError("Bu email artıq istifadə olunur.", 409);
+    }
+
     const existing = await authRepository.findByPhone(input.phone);
     if (existing) throw new AuthError("Bu telefon nömrəsi artıq qeydiyyatdan keçib.", 409);
 
     const passwordHash = await bcrypt.hash(input.password, 10);
-    const user = await authRepository.createCustomer({ ...input, passwordHash });
+    const user = await authRepository.createCustomer({ ...input, email, passwordHash });
 
     const sessionUser: SessionUser = {
       id: user.id,
