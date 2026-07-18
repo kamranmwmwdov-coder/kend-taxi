@@ -181,7 +181,7 @@ export function JobListingDetailView({ id }: { id: string }) {
 
       <div className="mb-3 flex flex-col gap-1.5 text-sm text-ink-muted">
         <span className="flex items-center gap-2">
-          <MapPin size={15} /> {listing.address}
+          <MapPin size={15} /> {listing.city ? `${listing.city}, ${listing.address}` : listing.address}
         </span>
         {listing.event_date && (
           <span className="flex items-center gap-2">

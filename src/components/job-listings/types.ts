@@ -21,6 +21,7 @@ export interface CustomerJobListing {
   price: number | null;
   event_date: string | null;
   event_time: string | null;
+  city: string;
   address: string;
   description: string | null;
   is_vip: boolean;
@@ -32,6 +33,48 @@ export interface CustomerJobListing {
   created_at: string;
   user: JobListingUser | null;
   myReaction: MyReaction;
+}
+
+export interface MyJobListing {
+  id: string;
+  title: string;
+  category: string;
+  city: string;
+  address: string;
+  contact_phone: string;
+  whatsapp_phone: string | null;
+  images: string[];
+  price: number | null;
+  event_date: string | null;
+  event_time: string | null;
+  description: string | null;
+  status: "PENDING" | "ACTIVE" | "REJECTED" | "EXPIRED";
+  views_count: number;
+  likes_count: number;
+  dislikes_count: number;
+  published_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+}
+
+export const JOB_LISTING_CATEGORIES = [
+  "Tikinti və təmir",
+  "Kənd təsərrüfatı",
+  "Sürücülük",
+  "Qulluqçu / Dayə",
+  "Təmizlik",
+  "Ofisiant / Aşpaz",
+  "Satıcı",
+  "Mühafizə",
+  "Anbar / Yükləmə",
+  "Digər",
+] as const;
+
+/** Aktiv elanda qalan gün sayını hesablayır (mənfi olmur). */
+export function daysRemaining(expiresAt: string | null): number {
+  if (!expiresAt) return 0;
+  const diffMs = new Date(expiresAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
 }
 
 /** "3 saat əvvəl" formatında nisbi vaxt göstərir. */

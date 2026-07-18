@@ -122,7 +122,7 @@ export function JobListingCard({ listing }: { listing: CustomerJobListing }) {
       {/* Meta: ünvan / tarix / saat */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
         <span className="flex items-center gap-1">
-          <MapPin size={13} /> {listing.address}
+          <MapPin size={13} /> {listing.city ? `${listing.city}, ${listing.address}` : listing.address}
         </span>
         {listing.event_date && (
           <span className="flex items-center gap-1">

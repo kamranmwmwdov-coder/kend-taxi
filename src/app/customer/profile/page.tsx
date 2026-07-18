@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Briefcase, ChevronRight } from "lucide-react";
 import { getSession } from "@/utils/session";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
@@ -20,6 +20,19 @@ export default async function CustomerProfilePage() {
         <Row label="Soyad" value={session.lastName} />
         <Row label="Telefon" value={session.phone} />
       </div>
+
+      <Link
+        href="/customer/job-listings/mine"
+        className="mb-4 flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4"
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Briefcase size={18} />
+          </span>
+          <span className="text-sm font-semibold text-ink">Elanlarım</span>
+        </span>
+        <ChevronRight size={18} className="text-ink-muted" />
+      </Link>
 
       <div className="mb-3">
         <ChangePasswordForm />

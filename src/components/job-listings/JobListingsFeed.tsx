@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Briefcase } from "lucide-react";
+import { ArrowLeft, Briefcase, Plus } from "lucide-react";
 import Link from "next/link";
 import { JobListingCard } from "./JobListingCard";
 import type { CustomerJobListing } from "./types";
@@ -59,9 +59,17 @@ export function JobListingsFeed() {
 
   return (
     <main className="min-h-screen px-4 pt-4 max-w-sm mx-auto">
-      <Link href="/customer/home" className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm">
-        <ArrowLeft size={18} className="text-ink" />
-      </Link>
+      <div className="mb-3 flex items-center justify-between">
+        <Link href="/customer/home" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm">
+          <ArrowLeft size={18} className="text-ink" />
+        </Link>
+        <Link
+          href="/customer/job-listings/new"
+          className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-white active:bg-primary-dark"
+        >
+          <Plus size={16} /> Elan yerləşdir
+        </Link>
+      </div>
 
       {loading ? (
         <div className="flex flex-col gap-3">

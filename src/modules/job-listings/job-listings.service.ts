@@ -7,7 +7,7 @@ export class JobListingError extends Error {
   }
 }
 
-const LISTING_LIFETIME_DAYS = 30;
+const LISTING_LIFETIME_DAYS = 7;
 
 const DELETE_REASONS = [
   "Söyüş və təhqir",
@@ -208,6 +208,211 @@ export const jobListingsService = {
     if (error) throw error;
   },
 
+  /** Yeni elan yaradır. Həmişə PENDING statusu ilə başlayır. */
+  async createListing(
+    userId: string,
+    input: {
+      title: string;
+      category: string;
+      city: string;
+      address: string;
+      contactPhone: string;
+      whatsappPhone?: string | null;
+      images: string[];
+      price?: number | null;
+      eventDate?: string | null;
+      eventTime?: string | null;
+      description?: string | null;
+    }
+  ) {
+    if (!input.title?.trim()) throw new JobListingError("İş adı boş ola bilməz.", 422);
+    if (!input.category?.trim()) throw new JobListingError("Kateqoriya seçilməlidir.", 422);
+    if (!input.city?.trim()) throw new JobListingError("Şəhər boş ola bilməz.", 422);
+    if (!input.address?.trim()) throw new JobListingError("Ünvan boş ola bilməz.", 422);
+    if (!input.contactPhone?.trim()) throw new JobListingError("Telefon nömrəsi tələb olunur.", 422);
+    if (!input.images || input.images.length === 0) {
+      throw new JobListingError("Ən azı 1 şəkil əlavə edilməlidir.", 422);
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("job_listings")
+      .insert({
+        user_id: userId,
+        title: input.title.trim(),
+        category: input.category.trim(),
+        city: input.city.trim(),
+        address: input.address.trim(),
+        contact_phone: input.contactPhone,
+        whatsapp_phone: input.whatsappPhone || null,
+        images: input.images,
+        price: input.price ?? null,
+        event_date: input.eventDate || null,
+        event_time: input.eventTime || null,
+        description: input.description || null,
+        status: "PENDING",
+      })
+      .select(SELECT_WITH_USER)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  /** İstifadəçinin öz elanları (silinməmiş) — Elanlarım bölməsi üçün. */
+  async listMine(userId: string) {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("job_listings")
+      .select(SELECT_WITH_USER)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+
+  /** Redaktə səhifəsini əvvəlcədən doldurmaq üçün sahiblik yoxlanılmış tək elan. */
+  async getOwnById(id: string, userId: string) {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("job_listings")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  /** Sahiblik yoxlanılmış redaktə. Elan yenidən moderator təsdiqinə düşür. */
+  async updateOwn(
+    id: string,
+    userId: string,
+    input: {
+      title?: string;
+      category?: string;
+      city?: string;
+      address?: string;
+      contactPhone?: string;
+      whatsappPhone?: string | null;
+      images?: string[];
+      price?: number | null;
+      eventDate?: string | null;
+      eventTime?: string | null;
+      description?: string | null;
+    }
+  ) {
+    const supabase = getSupabaseAdmin();
+    const { data: existing, error: fetchErr } = await supabase
+      .from("job_listings")
+      .select("id, user_id, status")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!existing) throw new JobListingError("Elan tapılmadı.", 404);
+
+    if (input.title !== undefined && !input.title.trim()) {
+      throw new JobListingError("İş adı boş ola bilməz.", 422);
+    }
+    if (input.address !== undefined && !input.address.trim()) {
+      throw new JobListingError("Ünvan boş ola bilməz.", 422);
+    }
+
+    const patch: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+      // Redaktədən sonra elan yenidən moderasiyaya düşür və aktiv siyahıda görünmür
+      status: "PENDING",
+      published_at: null,
+      expires_at: null,
+    };
+    if (input.title !== undefined) patch.title = input.title.trim();
+    if (input.category !== undefined) patch.category = input.category.trim();
+    if (input.city !== undefined) patch.city = input.city.trim();
+    if (input.address !== undefined) patch.address = input.address.trim();
+    if (input.contactPhone !== undefined) patch.contact_phone = input.contactPhone;
+    if (input.whatsappPhone !== undefined) patch.whatsapp_phone = input.whatsappPhone || null;
+    if (input.images !== undefined) patch.images = input.images;
+    if (input.price !== undefined) patch.price = input.price;
+    if (input.eventDate !== undefined) patch.event_date = input.eventDate || null;
+    if (input.eventTime !== undefined) patch.event_time = input.eventTime || null;
+    if (input.description !== undefined) patch.description = input.description || null;
+
+    const wasActive = existing.status === "ACTIVE";
+
+    const { data, error } = await supabase
+      .from("job_listings")
+      .update(patch)
+      .eq("id", id)
+      .select(SELECT_WITH_USER)
+      .single();
+    if (error) throw error;
+
+    if (wasActive) {
+      await notificationsService.create(
+        userId,
+        "Elan yenidən yoxlanılır",
+        "Elanınızı redaktə etdiniz. Dəyişikliklər moderator təsdiqindən sonra digər istifadəçilərə görünəcək.",
+        "JOB_LISTING_RESUBMITTED"
+      );
+    }
+
+    return data;
+  },
+
+  /** Sahiblik yoxlanılmış soft-delete. */
+  async deleteOwn(id: string, userId: string) {
+    const supabase = getSupabaseAdmin();
+    const { data: existing, error: fetchErr } = await supabase
+      .from("job_listings")
+      .select("id, user_id")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!existing) throw new JobListingError("Elan tapılmadı.", 404);
+
+    const { error } = await supabase
+      .from("job_listings")
+      .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  /** Gündəlik cron: 7 günü bitmiş aktiv elanları EXPIRED edir və gizlədir. */
+  async expireOldListings() {
+    const supabase = getSupabaseAdmin();
+    const nowIso = new Date().toISOString();
+    const { data: expired, error } = await supabase
+      .from("job_listings")
+      .select("id, user_id")
+      .eq("status", "ACTIVE")
+      .is("deleted_at", null)
+      .lt("expires_at", nowIso);
+    if (error) throw error;
+    if (!expired || expired.length === 0) return 0;
+
+    const ids = expired.map((l) => l.id);
+    const { error: updErr } = await supabase
+      .from("job_listings")
+      .update({ status: "EXPIRED", deleted_at: nowIso, updated_at: nowIso })
+      .in("id", ids);
+    if (updErr) throw updErr;
+
+    for (const listing of expired) {
+      await notificationsService.create(
+        listing.user_id,
+        "Elanın müddəti bitdi",
+        "İş elanınızın 7 günlük müddəti başa çatdı və siyahıdan silindi. İstəsəniz eyni məlumatla yeni elan yerləşdirə bilərsiniz.",
+        "JOB_LISTING_EXPIRED"
+      );
+    }
+    return expired.length;
+  },
+
   // ---------- ADMIN TƏRƏFİ ----------
 
   async listByStatus(status: "PENDING" | "ACTIVE") {
@@ -298,6 +503,14 @@ export const jobListingsService = {
       .single();
     if (error) throw error;
     if (!data) throw new JobListingError("Elan tapılmadı və ya artıq təsdiqlənib.", 404);
+
+    await notificationsService.create(
+      data.user_id,
+      "Elan təsdiq edildi",
+      `"${data.title}" elanınız moderator tərəfindən təsdiqləndi və indi digər istifadəçilərə görünür.`,
+      "JOB_LISTING_APPROVED"
+    );
+
     return data;
   },
 
@@ -312,11 +525,13 @@ export const jobListingsService = {
     const supabase = getSupabaseAdmin();
     const { data: listing, error: fetchErr } = await supabase
       .from("job_listings")
-      .select("id, user_id, title")
+      .select("id, user_id, title, status")
       .eq("id", id)
       .single();
     if (fetchErr) throw fetchErr;
     if (!listing) throw new JobListingError("Elan tapılmadı.", 404);
+
+    const wasActive = listing.status === "ACTIVE";
 
     const { error } = await supabase
       .from("job_listings")
@@ -332,9 +547,11 @@ export const jobListingsService = {
 
     await notificationsService.create(
       listing.user_id,
-      "Elanınız yoxlanıldı",
-      `Elanınız moderator tərəfindən yoxlanıldı və paylaşılmadı. Səbəb: ${reason}${note ? ` (${note})` : ""}`,
-      "JOB_LISTING_REJECTED"
+      wasActive ? "Elan silindi" : "Elan paylaşılmadı",
+      wasActive
+        ? `"${listing.title}" elanınız moderator tərəfindən silindi. Səbəb: ${reason}${note ? ` (${note})` : ""}`
+        : `Elanınız moderator tərəfindən yoxlanıldı və paylaşılmadı. Səbəb: ${reason}${note ? ` (${note})` : ""}`,
+      wasActive ? "JOB_LISTING_DELETED" : "JOB_LISTING_REJECTED"
     );
   },
 

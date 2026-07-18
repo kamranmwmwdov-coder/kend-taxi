@@ -5,12 +5,14 @@ interface Props {
   value: string;
   onChange: (raw: string) => void;
   error?: string;
+  label?: string;
+  required?: boolean;
 }
 
-export function PhoneInput({ value, onChange, error }: Props) {
+export function PhoneInput({ value, onChange, error, label = "Telefon nömrəsi", required }: Props) {
   return (
     <div>
-      <label className="block text-sm font-medium text-ink-muted mb-1">Telefon nömrəsi</label>
+      <label className="block text-sm font-medium text-ink-muted mb-1">{label}</label>
       <input
         type="tel"
         inputMode="numeric"
@@ -19,6 +21,7 @@ export function PhoneInput({ value, onChange, error }: Props) {
         value={formatPhoneMask(value)}
         onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
         maxLength={13}
+        required={required}
       />
       {error && <p className="text-danger text-sm mt-1">{error}</p>}
     </div>
