@@ -8,8 +8,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Kənd Taxi";
   const options = {
     body: payload.body || "Yeni bildirişiniz var.",
-    icon: "/app-icon.svg",
-    badge: "/app-icon.svg",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
     tag: payload.tag,
     renotify: false,
     data: { url: payload.url || "/" },
