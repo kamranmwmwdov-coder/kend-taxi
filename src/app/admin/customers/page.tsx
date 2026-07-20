@@ -37,6 +37,15 @@ export default function AdminCustomersPage() {
     load();
   }
 
+  async function deleteCustomer(c: Customer) {
+    const confirmed = window.confirm(
+      `${c.first_name} ${c.last_name} hesabını silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.`
+    );
+    if (!confirmed) return;
+    await fetch(`/api/admin/customers/${c.id}`, { method: "DELETE" });
+    load();
+  }
+
   const filtered = customers.filter((c) => {
     const q = search.toLowerCase();
     return !q || `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) || c.phone.includes(q);
@@ -80,9 +89,12 @@ export default function AdminCustomersPage() {
                       {c.status === "BLOCKED" ? "Bloklanıb" : "Aktiv"}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 space-x-3 whitespace-nowrap">
                     <button onClick={() => toggleBlock(c)} className="text-primary font-medium text-sm">
                       {c.status === "BLOCKED" ? "Blokdan çıxar" : "Blok et"}
+                    </button>
+                    <button onClick={() => deleteCustomer(c)} className="text-danger font-medium text-sm">
+                      Sil
                     </button>
                   </td>
                 </tr>
