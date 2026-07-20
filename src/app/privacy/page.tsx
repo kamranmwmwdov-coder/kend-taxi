@@ -1,8 +1,8 @@
 import { BackButton } from "@/components/BackButton";
 
 export const metadata = {
-  title: "Məxfilik Siyasəti | Kənd Taxi",
-  description: "Kənd Taxi platformasının məxfilik siyasəti",
+  title: "Məxfilik Siyasəti | başlayışqı.online",
+  description: "başlayışqı.online platformasının məxfilik siyasəti",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-base font-semibold mb-2">1. Ümumi müddəalar</h2>
           <p>
-            Bu Məxfilik Siyasəti (bundan sonra – &quot;Siyasət&quot;) &quot;Kənd Taxi&quot; platformasının
+            Bu Məxfilik Siyasəti (bundan sonra – &quot;Siyasət&quot;) &quot;başlayışqı.online&quot; platformasının
             (bundan sonra – &quot;Platforma&quot;) İstifadəçilərin fərdi məlumatlarını hansı məqsədlə
             topladığını, necə işlədiyini, saxladığını və qoruduğunu izah edir. Siyasət Azərbaycan
             Respublikasının &quot;Fərdi məlumatlar haqqında&quot; Qanununa və digər müvafiq normativ hüquqi

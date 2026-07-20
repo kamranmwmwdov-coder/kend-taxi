@@ -1,8 +1,8 @@
 import { BackButton } from "@/components/BackButton";
 
 export const metadata = {
-  title: "İstifadə Şərtləri | Kənd Taxi",
-  description: "Kənd Taxi platformasının istifadə şərtləri",
+  title: "İstifadə Şərtləri | başlayışqı.online",
+  description: "başlayışqı.online platformasının istifadə şərtləri",
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-base font-semibold mb-2">1. Ümumi müddəalar</h2>
           <p>
-            Bu İstifadə Şərtləri (bundan sonra – &quot;Şərtlər&quot;) &quot;Kənd Taxi&quot; onlayn platformasından
+            Bu İstifadə Şərtləri (bundan sonra – &quot;Şərtlər&quot;) &quot;başlayışqı.online&quot; onlayn platformasından
             (bundan sonra – &quot;Platforma&quot;) istifadə edən bütün fiziki və hüquqi şəxslər (bundan sonra –
             &quot;İstifadəçi&quot;) üçün məcburi qaydaları müəyyən edir. Platformadan istifadə etməklə İstifadəçi bu
             Şərtlərlə tam şəkildə tanış olduğunu və onları qeyd-şərtsiz qəbul etdiyini təsdiq edir. Şərtlərlə razı

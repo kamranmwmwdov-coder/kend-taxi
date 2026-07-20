@@ -5,7 +5,7 @@ self.addEventListener("push", (event) => {
   } catch {
     payload = { body: event.data ? event.data.text() : "" };
   }
-  const title = payload.title || "Kənd Taxi";
+  const title = payload.title || "başlayışqı.online";
   const options = {
     body: payload.body || "Yeni bildirişiniz var.",
     icon: "/icon-192.png",

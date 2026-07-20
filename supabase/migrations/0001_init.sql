@@ -257,7 +257,7 @@ insert into settings (key, value) values
   ('local_price_increase_max_count', '2'),
   ('baku_trip_capacity', '10'),
   ('whatsapp_admin_number', '"+994000000000"'),
-  ('app_name', '"Kənd Taxi"');
+  ('app_name', '"başlayışqı.online"');
 
 -- ---------- AUDIT LOGS ----------
 create table audit_logs (

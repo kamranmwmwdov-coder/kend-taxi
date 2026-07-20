@@ -35,7 +35,7 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   return (
     <aside className="w-64 shrink-0 bg-ink text-white min-h-screen p-4 hidden md:flex md:flex-col">
       <div className="mb-6 px-2">
-        <p className="font-bold text-lg">Kənd Taxi</p>
+        <p className="font-bold text-lg">başlayışqı.online</p>
         <p className="text-white/50 text-xs">Admin — {adminName}</p>
       </div>
 

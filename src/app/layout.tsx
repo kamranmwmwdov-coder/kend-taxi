@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Kend Taxi" },
-  title: "Kənd Taxi",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "başlayışqı.online" },
+  title: "başlayışqı.online",
   description: "Kənd və rayonlar üçün nəqliyyat platforması",
 };
 
