@@ -22,7 +22,7 @@ export function SplashScreen({ appName }: { appName: string }) {
           .toUpperCase()}
       </div>
       <h1 className="text-xl font-bold">{appName}</h1>
-      <p className="text-white/70 text-sm mt-1">Rahat və etibarlı yol yoldaşınız</p>
+      <p className="text-white/70 text-sm mt-1">Tətbiq xidmət platformaları toplusudur</p>
     </div>
   );
 }

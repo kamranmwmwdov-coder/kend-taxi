@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Car, Truck } from "lucide-react";
+import { User, Truck } from "lucide-react";
 import { AdBanner } from "@/components/AdBanner";
 import { SplashScreen } from "@/components/SplashScreen";
 import { getPublicSettings } from "@/modules/settings/settings.service";
@@ -31,12 +31,12 @@ export default async function EntryPage() {
             {initials}
           </div>
           <h1 className="text-2xl font-bold text-ink">{appName}</h1>
-          <p className="text-ink-muted text-sm mt-1">Rahat və etibarlı yol yoldaşınız</p>
+          <p className="text-ink-muted text-sm mt-1">Tətbiq xidmət platformaları toplusudur</p>
         </div>
 
         <div className="w-full max-w-sm flex flex-col gap-3">
           <Link href="/customer/login" className="btn-primary flex items-center justify-center gap-2">
-            <Car size={20} /> Müştəri kimi davam et
+            <User size={20} /> Müştəri kimi davam et
           </Link>
           <Link
             href="/driver/login"
