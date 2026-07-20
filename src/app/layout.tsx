@@ -7,6 +7,7 @@ import { PwaServiceWorker } from "@/components/PwaServiceWorker";
 
 export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
+  themeColor: "#5B4FE5",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
